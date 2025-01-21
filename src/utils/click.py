@@ -38,6 +38,7 @@ class Click:
 
     def ocr_click(self, text, sleep_time=cfg.sleep_time, roi=[0, 0, 0, 0]):
         time.sleep(sleep_time)
+        random_num = random.random()
         if roi != [0, 0, 0, 0]:
             roi = [
                 roi[0] * cfg.width,
@@ -47,9 +48,9 @@ class Click:
             ]
         logger.debug(f"StartClick: {text}")
         detail = self.context.run_task(
-            text,
+            f"{text}_{random_num}",
             {
-                text: {
+                f"{text}_{random_num}": {
                     "timeout": 1500,
                     "recognition": "OCR",
                     "roi": roi,
@@ -105,3 +106,38 @@ class Click:
         )
         logger.debug(f"StartSwape_{random_num} Finish")
         return detail
+
+    def check_stage_return_home(self, stage_name):
+        time.sleep(cfg.sleep_time)
+        logger.debug(f"CheckStage_{stage_name} Start")
+        detail = self.ocr_click(stage_name)
+        logger.debug(f"CheckStage_{stage_name} Finish")
+        return detail
+
+    def ocr_rate_click(
+        self,
+        text,
+        x,
+        y,
+        offset_x=5,
+        offset_y=5,
+        sleep_time=cfg.sleep_time,
+        roi=[0, 0, 0, 0],
+    ):
+        time.sleep(sleep_time)
+        logger.debug(f"StartSearch: {text}")
+        detail = self.context.run_task(
+            text,
+            {
+                text: {
+                    "timeout": 1500,
+                    "recognition": "OCR",
+                    "roi": roi,
+                    "expected": text,
+                }
+            },
+        )
+        logger.debug(f"Search_{text} Finish")
+        if detail and detail.status.succeeded:
+            last_detail = self.click_rate(x, y, offset_x, offset_y)
+            return last_detail[1]
