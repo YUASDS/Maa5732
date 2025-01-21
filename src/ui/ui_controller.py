@@ -1,80 +1,103 @@
 # 导入sys
 import sys
+from typing import Union
+from loguru import logger
+from PySide6.QtWidgets import QApplication, QWidget, QPushButton, QCheckBox, QComboBox
+from PySide6.QtCore import QObject, Signal
 
-# 任何一个PySide界面程序都需要使用QApplication
-# 我们要展示一个普通的窗口，所以需要导入QWidget，用来让我们自己的类继承
-from PySide6.QtWidgets import QApplication, QWidget, QPushButton
+from src.ui.ui import Ui_Form
+from src.utils.configs import cfg, save_confg
+from src.core.ThreadManager import tasker_thread
 
-# 导入我们生成的界面
-from ui import Ui_Form
+
+class MySignal(QObject):
+    button = Signal(QPushButton, str)
 
 
 # 继承QWidget类，以获取其属性和方法
 class MyWidget(QWidget):
     order = {}
     state = 0
+    widget_button: list[QPushButton] = []
+    check_box_dict: dict[str, QCheckBox] = {}
+    detail_dict: dict[str, dict[str, Union[QCheckBox, QComboBox]]] = {}
 
     def __init__(self):
         super().__init__()
-        # 设置界面为我们生成的界面
+        self.signal = MySignal()
+        self.signal.button.connect(self.print_gui)
+
         self.ui = Ui_Form()
         self.ui.setupUi(self)
-        self.ui.GuildButton.clicked.connect(self.buttonClick)
-        self.ui.RaidButton.clicked.connect(self.buttonClick)
-        self.ui.StartButton.clicked.connect(self.buttonClick)
-        self.ui.FriendsButton.clicked.connect(self.buttonClick)
-        self.ui.PurchaseButton.clicked.connect(self.buttonClick)
-        self.ui.SupervisionButton.clicked.connect(self.buttonClick)
+        self.widget_button.append(self.ui.GuildButton)
+        self.widget_button.append(self.ui.RaidButton)
+        self.widget_button.append(self.ui.StartButton)
+        self.widget_button.append(self.ui.FriendsButton)
+        self.widget_button.append(self.ui.PurchaseButton)
+        self.widget_button.append(self.ui.SupervisionButton)
+        for button in self.widget_button:
+            button.clicked.connect(self.buttonClick)
         self.ui.LinkStartButton.clicked.connect(self.start)
-
         self.ui.SlectAllButton.clicked.connect(self.select_all)
         self.ui.ClearAllButton.clicked.connect(self.clear_all)
+        # nothing 不进行注册
 
-        self.ui.GuildcheckBox.clicked.connect(self.checkBox)
-        self.ui.RaidcheckBox.clicked.connect(self.checkBox)
-        self.ui.StartcheckBox.clicked.connect(self.checkBox)
-        self.ui.FriendscheckBox.clicked.connect(self.checkBox)
-        self.ui.PurchasecheckBox.clicked.connect(self.checkBox)
-        self.ui.SupervisioncheckBox.clicked.connect(self.checkBox)
-        self.ui.ConstructioncheckBox.clicked.connect(self.checkBox)
-        self.ui.DailyCheckincheckBox.clicked.connect(self.checkBox)
-        self.ui.BureaucheckBox.clicked.connect(self.checkBox)
+        self.add_check_box(self.ui.GuildcheckBox)
+        self.add_check_box(self.ui.RaidcheckBox)
+        self.add_check_box(self.ui.StartToHomeActioncheckBox)
+        self.add_check_box(self.ui.FriendscheckBox)
+        self.add_check_box(self.ui.PurchasecheckBox)
+        self.add_check_box(self.ui.SupervisioncheckBox)
+        self.add_check_box(self.ui.ConstructioncheckBox)
+        self.add_check_box(self.ui.DailyCheckincheckBox)
+        self.add_check_box(self.ui.BureaucheckBox)
+        self.add_check_box(self.ui.GetMailcheckBox)
 
+        self.add_detail_box(self.ui.Purchase_ActivityShopcheckBox)
+        self.add_detail_box(self.ui.Purchase_FreeShopcheckBox)
+        self.add_detail_box(self.ui.Purchase_FriendShopcheckBox)
+        self.add_detail_box(self.ui.Friends_AutoLikecheckBox)
+        self.add_detail_box(self.ui.Friends_FriendPointcheckBox)
+        self.add_detail_box(self.ui.Raid_RaidDarkcheckBox)
+        self.add_detail_box(self.ui.Raid_RaidFightcheckBox)
+        self.add_detail_box(self.ui.Raid_RaidRivercheckBox)
+
+        self.add_detail_box(self.ui.Guild_GuildCombo)
+        self.add_detail_box(self.ui.Raid_ResourceCombo)
+        self.add_detail_box(self.ui.Supervision_RewardCombo)
         self.init_combo()
+        self.load_from_json(cfg.settings)
+
+    def add_check_box(self, check_box: QCheckBox):
+        check_box.clicked.connect(self.checkBox)
+        self.check_box_dict[check_box.objectName().replace("checkBox", "")] = check_box
+
+    def add_detail_box(self, obj: Union[QCheckBox, QComboBox]):
+        action_name = obj.objectName().split("_")[0]
+        action_setting = obj.objectName().split("_")[1]
+        if action_name not in self.detail_dict:
+            self.detail_dict[action_name] = {}
+        self.detail_dict[action_name][action_setting] = obj
 
     def init_combo(self):
-        self.ui.GuildCombo.addItems(["狄斯币", "异方晶"])
-        self.ui.ResourceCombo.addItems(["狄斯币", "狂厄结晶"])
-        self.ui.SupervisionRewardCombo.addItems(["a", "b"])
+        self.ui.Guild_GuildCombo.addItems(["狄斯币", "异方晶"])
+        self.ui.Raid_ResourceCombo.addItems(["狄斯币", "狂厄结晶"])
+        self.ui.Supervision_RewardCombo.addItems(["体力", "监察"])
 
     def checkBox(self):
         box = self.sender()
         boxName = box.objectName()
-        print(boxName)
 
     def select_all(self):
-        self.ui.GuildcheckBox.setChecked(True)
-        self.ui.RaidcheckBox.setChecked(True)
-        self.ui.StartcheckBox.setChecked(True)
-        self.ui.FriendscheckBox.setChecked(True)
-        self.ui.PurchasecheckBox.setChecked(True)
-        self.ui.SupervisioncheckBox.setChecked(True)
-        self.ui.BureaucheckBox.setChecked(True)
-        self.ui.ConstructioncheckBox.setChecked(True)
-        self.ui.DailyCheckincheckBox.setChecked(True)
+        for checkBox in self.check_box_dict.values():
+            checkBox.setChecked(True)
 
     def clear_all(self):
-        self.ui.GuildcheckBox.setChecked(False)
-        self.ui.BureaucheckBox.setChecked(False)
-        self.ui.RaidcheckBox.setChecked(False)
-        self.ui.StartcheckBox.setChecked(False)
-        self.ui.FriendscheckBox.setChecked(False)
-        self.ui.PurchasecheckBox.setChecked(False)
-        self.ui.SupervisioncheckBox.setChecked(False)
-        self.ui.ConstructioncheckBox.setChecked(False)
-        self.ui.DailyCheckincheckBox.setChecked(False)
+        for checkBox in self.check_box_dict.values():
+            checkBox.setChecked(False)
 
     def buttonClick(self):
+        self.state_to_json()
         btn = self.sender()
         btnName = btn.objectName()
         if btnName == "RaidButton":
@@ -82,7 +105,7 @@ class MyWidget(QWidget):
         if btnName == "GuildButton":
             self.ui.stackedWidget.setCurrentWidget(self.ui.Guild)
         if btnName == "StartButton":
-            self.ui.stackedWidget.setCurrentWidget(self.ui.Start)
+            self.ui.stackedWidget.setCurrentWidget(self.ui.StartToHomeAction)
         if btnName == "FriendsButton":
             self.ui.stackedWidget.setCurrentWidget(self.ui.Friends)
         if btnName == "PurchaseButton":
@@ -94,21 +117,56 @@ class MyWidget(QWidget):
         if btnName == "ClearAllButton":
             self.ui.stackedWidget.setCurrentWidget(self.ui.Supervision)
 
-    def start(self):
+    def print_gui(self, obj: QObject, msg: str):
+        if isinstance(obj, QPushButton):
+            obj.setText(msg)
 
+    def start(self):
         if self.state == 0:
-            self.ui.LinkStartButton.setText("Stop")
+            self.signal.button.emit(self.ui.LinkStartButton, "Stop")
             self.state = 1
+            json_data = self.state_to_json()
+            tasker_thread.set_task(self.state_to_json())
+            cfg.settings = json_data
+            save_confg()
+            tasker_thread.start()
+
         else:
-            self.ui.LinkStartButton.setText("Link Start!")
+            self.signal.button.emit(self.ui.LinkStartButton, "Link Start!")
+            tasker_thread.cancle_task()
             self.state = 0
+
+    def load_from_json(self, data: list[dict]):
+        for key, value in data[0].items():
+            self.check_box_dict[key].setChecked(value)
+        for key, value in data[1].items():
+            if key in self.detail_dict:
+                for inner_key, inner_value in value.items():
+                    if inner_key in self.detail_dict[key]:
+                        qobj = self.detail_dict[key][inner_key]
+                        if isinstance(qobj, QCheckBox):
+                            qobj.setChecked(inner_value)
+                        else:
+                            qobj.setCurrentText(inner_value)
+
+    def state_to_json(self):
+        detail_part = {key: {} for key in self.detail_dict.keys()}
+        first_part = {
+            name: obj.isChecked() for name, obj in self.check_box_dict.items()
+        }
+        for key, value in self.detail_dict.items():
+            for inner_key, inner_value in value.items():
+                if isinstance(inner_value, QCheckBox):
+                    detail_part[key][inner_key] = inner_value.isChecked()
+                else:
+                    detail_part[key][inner_key] = inner_value.currentText()
+        return [first_part, detail_part]
 
 
 # 程序入口
 if __name__ == "__main__":
     # 初始化QApplication，界面展示要包含在QApplication初始化之后，结束之前
     app = QApplication(sys.argv)
-
     # 初始化并展示我们的界面组件
     window = MyWidget()
     window.show()

@@ -1,7 +1,10 @@
 import queue
 import threading
+from loguru import logger
 
+from src.core.actions import *
 from src.core.TaskerManager import TASKER_MANAGER
+from src.utils.parse import json2pipline
 
 
 class TaskerThread(threading.Thread):
@@ -12,20 +15,19 @@ class TaskerThread(threading.Thread):
         threading.Thread.__init__(self, name=name)
 
     def run(self) -> None:
-        TASKER_MANAGER.init()
-        TASKER_MANAGER.tasker.post_task("1", self._dict2pipeline()).wait().get()
+        try:
+            TASKER_MANAGER.init()
+            logger.info("LINK START!")
+            TASKER_MANAGER.tasker.post_task("1", self.task).wait().get()
+        except Exception as e:
+            logger.exception(e)
 
-    def add_task(self, task: dict):
-        self.task = task
+    def set_task(self, json_data: list[dict]):
+        self.task = json2pipline(json_data)
 
     def cancle_task(self):
         self.task = {}
-        TASKER_MANAGER.tasker.post_stop()
-        pass
-
-    def _dict2pipeline(self):
-        pipline = self.task
-        return pipline
+        return TASKER_MANAGER.tasker.post_stop()
 
 
 tasker_thread = TaskerThread()

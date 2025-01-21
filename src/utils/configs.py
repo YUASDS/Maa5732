@@ -13,6 +13,68 @@ scrn_dir = os.path.join(curr_dir, "screenshot.png")  # 截图后用于识别
 ## 当前日期
 formatted_today = time.strftime("%Y-%m-%d", time.localtime(time.time()))
 #! 以上参数在引用时需要使用类似config.ocr_dir的格式
+base_template = """{
+            "0": {
+                "action": "custom",
+                "custom_action": "Nothing"
+            },
+            "1": {
+                "action": "custom",
+                "custom_action": "StartToHomeAction",
+                "custom_action_param": "StartToHomeActionCustom",
+                "next": "2"
+            },
+            "2": {
+                "action": "custom",
+                "custom_action": "DailyCheckin",
+                "next": "3"
+            },
+            "3": {
+                "action": "custom",
+                "custom_action": "Guild",
+                "custom_action_param": "GuildCustom",
+                "next": "4"
+            },
+            "4": {
+                "action": "custom",
+                "custom_action": "GetMail",
+                "next": "5"
+            },
+            "5": {
+                "action": "custom",
+                "custom_action": "Purchase",
+                "custom_action_param": "PurchaseCustom",
+                "next": "6"
+            },
+            "6": {
+                "action": "custom",
+                "custom_action": "Construction",
+                "custom_action_param": "ConstructionCustom",
+                "next": "7"
+            },
+            "7": {
+                "action": "custom",
+                "custom_action": "Bureau",
+                "next": "8"
+            },
+            "8": {
+                "action": "custom",
+                "custom_action": "Friends",
+                "custom_action_param": "FriendsCustom",
+                "next": "9"
+            },
+            "9": {
+                "action": "custom",
+                "custom_action": "Raid",
+                "custom_action_param": "RaidCustom",
+                "next": "10"
+            },
+            "10": {
+                "action": "custom",
+                "custom_action": "Supervision",
+                "custom_action_param": "SupervisionCustom"
+            }
+        }"""
 
 
 # 从Config取值，当前程序专用
@@ -22,13 +84,6 @@ def load_config():
     ) as f:
         config = json.load(f)
     return config
-
-
-def save_config():
-    with open(
-        os.path.join(curr_dir, "assets", "config", "config.json"), "w", encoding="utf-8"
-    ) as f:
-        json.dump(config, f)
 
 
 config = load_config()
@@ -43,3 +98,15 @@ class cfg:
     width = 1280
     height = 720
     sleep_time = config["sleep_time"]
+    settings = config["settings"]
+
+
+def save_confg():
+    this_config = {
+        "sleep_time": cfg.sleep_time,
+        "settings": cfg.settings,
+    }
+    with open(
+        os.path.join(curr_dir, "assets", "config", "config.json"), "w", encoding="utf-8"
+    ) as f:
+        json.dump(this_config, f, ensure_ascii=False)

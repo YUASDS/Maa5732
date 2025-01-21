@@ -60,7 +60,7 @@ class TaskerManager:
 
     def add_action(self, custon_action: type[MyCustomAction]):
         self.custon_action[custon_action.name] = custon_action
-        logger.debug(f"add_action {custon_action.name}")
+        logger.debug(f"load {custon_action.name}")
         return custon_action
 
     def _register_custom_action(self):
