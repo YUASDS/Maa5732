@@ -34,32 +34,34 @@ class Raid(MyCustomAction):
         action_param = json.loads(argv.custom_action_param)
         print(action_param)
         run_param = default_cfg.copy()
-        if not action_param == {}:
+        if action_param != {}:
             run_param = action_param
         clicker = Click(context)
-
-        if run_param["RaidRiver"]:
-            logger.info(f"RaidRiver Start")
+        # 点击危机管理
+        clicker.click_rate(0.74, 0.89)
+        if run_param["RaidRivercheckBox"]:
+            logger.info("RaidRiver Start")
             clicker.click_rate(0.9, 0.2)
             clicker.ocr_click("锈河")
             clicker.ocr_click("记忆风暴")
             clicker.ocr_click("4")
+            # 不知道为什么点了4之后就开始重复RaidAction了
             clicker.ocr_click("连续扫荡")
             clicker.ocr_click("开始扫荡")
             clicker.ocr_click("完成", 10)
             clicker.return_home()
-            logger.info(f"RaidRiver Finish")
+            logger.info("RaidRiver Finish")
 
-        if run_param["RaidDark"]:
-            logger.info(f"RaidDark Start")
+        if run_param["RaidDarkcheckBox"]:
+            logger.info("RaidDark Start")
             clicker.click_rate(0.9, 0.2)
             clicker.ocr_click("内海")
             clicker.ocr_click("浊暗之阱")
-            clicker.ocr_click("浊暗")
+            clicker.ocr_click("浊暗", roi=[0.25, 0, 0.75, 1])
             clicker.ocr_click("扫荡")
             clicker.click_blink()
             clicker.return_home()
-            logger.info(f"RaidDark Finish")
+            logger.info("RaidDark Finish")
 
         logger.info(f"{self.name} Finish")
         return True

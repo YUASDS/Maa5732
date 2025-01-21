@@ -5,6 +5,7 @@ from maa.context import Context
 
 from src.utils.configs import cfg
 from src.core.TaskerManager import TASKER_MANAGER, MyCustomAction
+from src.utils.click import Click
 
 
 @TASKER_MANAGER.add_action
@@ -23,46 +24,27 @@ class StartToHomeAction(MyCustomAction):
         """
         logger.info(f"{self.name} Start")
         logger.debug("Begin to click [0 0 100 100]")
-        context.run_task(
-            "click_blink",
-            {"click_blink": {"action": "Click", "target": [0, 0, 100, 100]}},
-        )
-        time.sleep(cfg.sleep_time)
+        clicker = Click(context)
+        clicker.click_rate(0.1, 0.1, 20, 20)
         # 点击预设
-        logger.debug("StartClick:进入管理局")
-        context.run_task(
-            "进入管理局",
-            {
-                "进入管理局": {
-                    "timeout": 1000,
-                    "recognition": "OCR",
-                    "expected": "进入管理局",
-                    "action": "Click",
-                },
-            },
-        )
-        time.sleep(3)
-        # context.run_action("Click", [0, 0, 100, 100])
-        status = True
-        while status:
-            detail = context.run_task(
-                "公告",
-                {
-                    "公告": {
-                        "timeout": 1000,
-                        "recognition": "OCR",
-                        "expected": "今日不再弹出",
-                        "action": "Click",
-                    },
-                },
-            )
-            time.sleep(cfg.sleep_time)
-            context.run_task(
-                "click_blink",
-                {"click_blink": {"action": "Click", "target": [0, 0, 100, 100]}},
-            )
+        clicker.ocr_click("进入管理局")
+        # 等待进入
+        time.sleep(20)
+        while True:
+            detail = clicker.ocr_click("今日不再弹出")
             status = detail.status.succeeded  # type: ignore
             logger.debug(f"Click:今日不再弹出 {status}")
+            if not status:
+                break
+            clicker.click_blink()
+        # 情绪检测
+        test_detail = clicker.ocr_rate_click("情绪检测", 0.625, 0.55)
+        if test_detail and test_detail.status.succeeded:
+            clicker.click_blink()
+        # 领取月卡
+        detail = clicker.ocr_click("贵宾")
+        if detail and detail.status.succeeded:
+            clicker.click_blink()
         logger.info(f"{self.name} Finish")
         return True
 

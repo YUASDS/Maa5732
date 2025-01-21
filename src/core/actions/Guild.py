@@ -30,6 +30,8 @@ class Guild(MyCustomAction):
         click.click_rate(0.9, 0.3)
 
         click.click_blink()
+        click.click_blink()
+
         click.ocr_click("秘盟捐赠")
         click.ocr_click("全部", roi=[0, 0, 0.3, 1])
         click.click_blink()

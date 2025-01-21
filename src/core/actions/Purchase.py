@@ -29,7 +29,7 @@ class Purchase(MyCustomAction):
         click.click_rate(0.74, 0.89)
         click.ocr_click("采购办")
         click.ocr_click("精选礼包")
-        for _ in range(3):
+        for _ in range(2):
             click.swape([0.965, 0.5, 10, 10], [0.1, 0.6, 10, 10], 1000)
         click.ocr_click("每日免费补给")
         click.ocr_click("购买")

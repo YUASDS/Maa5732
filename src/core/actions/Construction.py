@@ -26,7 +26,7 @@ class Construction(MyCustomAction):
         clicker.click_rate(0.829, 0.911)
 
         clicker.ocr_click("监管")
-        clicker.ocr_click("一键收取")
+        clicker.ocr_click("收取")
         clicker.click_blink()
         clicker.ocr_click("监管终端")
         clicker.click_rate(0.9, 0.6)
