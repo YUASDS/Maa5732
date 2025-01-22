@@ -8,6 +8,7 @@ from maa.define import MaaAdbInputMethodEnum
 from maa.context import Context
 
 from src.utils.configs import cfg
+from src.utils.adb import change_size
 
 
 class MyCustomAction(CustomAction):
@@ -44,6 +45,8 @@ class TaskerManager:
 
         # for demo, we just use the first device
         device = adb_devices[0]
+        # 自适应分辨率
+        change_size(device.address)
         self.controller = AdbController(
             adb_path=device.adb_path,
             address=device.address,
