@@ -16,7 +16,7 @@ Base on [MaaFramwork](https://github.com/MaaXYZ/MaaFramework)
 - [x] 采购办免费体力
 - [ ] 采购办友情点商店
 - [ ] 采购办活动商店
-- [x] 右键领取
+- [x] 邮件领取
 - [x] 基建收菜
 - [x] 管理局体力
 - [x] 管理局派遣
