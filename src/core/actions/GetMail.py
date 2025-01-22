@@ -24,6 +24,7 @@ class GetMail(MyCustomAction):
         clicker = Click(context)
         clicker.ocr_click("邮箱")
         clicker.ocr_click("快速处理")
+        clicker.click_blink()
         clicker.return_home()
         logger.info(f"{self.name} Finish")
         return True

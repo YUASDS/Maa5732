@@ -25,12 +25,13 @@ class Guild(MyCustomAction):
         """
         logger.info(f"{self.name} Start")
         click = Click(context)
+        # 整备中心
         click.click_rate(0.829, 0.911)
-        # 左下角秘盟可导致OCR出现问题
+        # 秘盟
         click.click_rate(0.9, 0.3)
-
-        click.click_blink()
-        click.click_blink()
+        # 首次进入 领取奖励
+        click.click_rate(0.9, 0.7)
+        click.click_rate(0.9, 0.7)
 
         click.ocr_click("秘盟捐赠")
         click.ocr_click("全部", roi=[0, 0, 0.3, 1])
