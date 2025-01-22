@@ -14,7 +14,7 @@ class MySignal(QObject):
     button = Signal(QPushButton, str)
 
 
-# 继承QWidget类，以获取其属性和方法
+# 继承QWidget类,以获取其属性和方法
 class MyWidget(QWidget):
     order = {}
     state = 0
@@ -80,9 +80,22 @@ class MyWidget(QWidget):
         self.detail_dict[action_name][action_setting] = obj
 
     def init_combo(self):
+
         self.ui.Guild_GuildCombo.addItems(["狄斯币", "异方晶"])
-        self.ui.Raid_ResourceCombo.addItems(["狄斯币", "狂厄结晶"])
-        self.ui.Supervision_RewardCombo.addItems(["体力", "监察"])
+        self.ui.Raid_ResourceCombo.addItems(
+            [
+                "狄斯币",
+                "狂乱精粹",
+                "技能模组",
+                "异能源质",
+                "诡秘源质",
+                "坚韧源质",
+                "狂暴源质",
+                "精准源质",
+                "启迪源质",
+            ]
+        )
+        self.ui.Supervision_RewardCombo.addItems(["体力", "监察徽印"])
 
     def checkBox(self):
         box = self.sender()
@@ -165,7 +178,7 @@ class MyWidget(QWidget):
 
 # 程序入口
 if __name__ == "__main__":
-    # 初始化QApplication，界面展示要包含在QApplication初始化之后，结束之前
+    # 初始化QApplication,界面展示要包含在QApplication初始化之后,结束之前
     app = QApplication(sys.argv)
     # 初始化并展示我们的界面组件
     window = MyWidget()
