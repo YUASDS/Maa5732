@@ -21,13 +21,12 @@ class DailyCheckin(MyCustomAction):
         :return: 是否执行成功。
         """
         logger.info(f"{self.name} Start")
-        click = Click(context)
-        target, detail = click.click_rate(0.825, 0.15)
-        target, detail = click.click_rate(0.807, 0.64)
-        # 点击预设
-        click.return_home()
+        clicker = Click(context)
+        test_detail = clicker.ocr_rate_click("情绪检测", 0.625, 0.55)
+        if test_detail and test_detail.status.succeeded:
+            clicker.click_blink()
+            clicker.return_home()
         logger.info(f"{self.name} Finish")
-
         return True
 
     def stop(self) -> None:

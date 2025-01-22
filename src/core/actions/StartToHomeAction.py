@@ -25,11 +25,12 @@ class StartToHomeAction(MyCustomAction):
         logger.info(f"{self.name} Start")
         logger.debug("Begin to click [0 0 100 100]")
         clicker = Click(context)
-        clicker.click_rate(0.1, 0.1, 20, 20)
+        detail = clicker.ocr_rate_click("系统公告", 0.1, 0.1, 20, 20)
         # 点击预设
-        clicker.ocr_click("进入管理局")
-        # 等待进入
-        time.sleep(20)
+        if detail and detail.status.succeeded:
+            clicker.ocr_click("进入管理局")
+            # 等待进入
+            time.sleep(20)
         # 领取月卡
         detail = clicker.ocr_click("贵宾")
         if detail and detail.status.succeeded:
