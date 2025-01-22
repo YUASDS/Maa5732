@@ -12,7 +12,7 @@ Base on [MaaFramwork](https://github.com/MaaXYZ/MaaFramework)
 
 - [ ] 定时启动游戏
 - [ ] 完成登录及签到月卡(测试次数缺乏，稳定性不确定)
-- [ ] 工会捐赠
+- [x] 工会捐赠(基本完成)
 - [x] 采购办免费体力
 - [ ] 采购办友情点商店
 - [ ] 采购办活动商店
