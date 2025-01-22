@@ -25,6 +25,7 @@ Base on [MaaFramwork](https://github.com/MaaXYZ/MaaFramework)
 - [x] 深井扫荡
 - [x] 锈河扫荡
 - [ ] 监察密令领取(测试次数缺乏)
+- [ ] 自动切换扫荡队伍
 
 ## 使用方法
 
