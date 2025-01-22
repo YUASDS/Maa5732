@@ -1,4 +1,6 @@
+import queue
 from loguru import logger
+
 from maa.resource import Resource
 from maa.controller import AdbController
 from maa.tasker import Tasker
@@ -26,6 +28,7 @@ class TaskerManager:
     controller: AdbController
     tasker: Tasker
     custon_action: dict = {}
+    init_flag_queue: queue.Queue = queue.Queue()
 
     def __init__(self) -> None:
         pass
@@ -52,14 +55,16 @@ class TaskerManager:
             address=device.address,
             screencap_methods=device.screencap_methods,
             input_methods=MaaAdbInputMethodEnum.AdbShell,
-            config=device.config,
+            config={},
+            # config=device.config,
         )
         self.controller.post_connection().wait()
-
         self.tasker = Tasker()
         # tasker = Tasker(notification_handler=MyNotificationHandler())
         self.tasker.bind(self.resource, self.controller)
         self._register_custom_action()
+        self.init_flag_queue.put(1)
+        logger.info("Init successeed!!!")
 
     def add_action(self, custon_action: type[MyCustomAction]):
         self.custon_action[custon_action.name] = custon_action

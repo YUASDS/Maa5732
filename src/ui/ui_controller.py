@@ -7,7 +7,7 @@ from PySide6.QtCore import QObject, Signal
 
 from src.ui.ui import Ui_Form
 from src.utils.configs import cfg, save_confg
-from src.core.ThreadManager import tasker_thread
+from src.core.ThreadManager import TaskerThread
 
 
 class MySignal(QObject):
@@ -24,6 +24,9 @@ class MyWidget(QWidget):
 
     def __init__(self):
         super().__init__()
+        self.tasker_thread = TaskerThread(self.change_running_state)
+        self.tasker_thread.daemon = True
+        self.tasker_thread.start()
         self.signal = MySignal()
         self.signal.button.connect(self.print_gui)
 
@@ -134,20 +137,24 @@ class MyWidget(QWidget):
         if isinstance(obj, QPushButton):
             obj.setText(msg)
 
-    def start(self):
+    def change_running_state(self):
         if self.state == 0:
             self.signal.button.emit(self.ui.LinkStartButton, "Stop")
             self.state = 1
+        else:
+            self.signal.button.emit(self.ui.LinkStartButton, "Link Start ! ")
+            self.state = 0
+
+    def start(self):
+        if self.state == 0:
+            self.change_running_state()
             json_data = self.state_to_json()
-            tasker_thread.set_task(self.state_to_json())
+            self.tasker_thread.add_task(self.state_to_json())
             cfg.settings = json_data
             save_confg()
-            tasker_thread.start()
-
         else:
-            self.signal.button.emit(self.ui.LinkStartButton, "Link Start!")
-            tasker_thread.cancle_task()
-            self.state = 0
+            # self.change_running_state()
+            self.tasker_thread.cancle_task()
 
     def load_from_json(self, data: list[dict]):
         for key, value in data[0].items():

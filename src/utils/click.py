@@ -1,9 +1,36 @@
-import random
 import time
-from maa.context import Context
+import queue
+import random
+
 from loguru import logger
+from maa.context import Context
+from maa.define import TaskDetail, Status, MaaStatusEnum
 
 from src.utils.configs import cfg
+
+STOP = queue.Queue()
+STOP.put(1)
+
+
+def control_tragger(func):
+    def func_wrapper(*args, **kwargs):
+        global STOP
+        tragger = STOP.empty()
+        if not tragger:
+            logger.warning("STOPPING!!!!")
+            if random.random() > 0.5:
+                status = MaaStatusEnum.succeeded
+            else:
+                status = MaaStatusEnum.failed
+            return TaskDetail(
+                task_id=-1,
+                nodes=[],
+                entry="",
+                status=Status(status=status),
+            )
+        return func(*args, **kwargs)
+
+    return func_wrapper
 
 
 class Click:
@@ -23,6 +50,7 @@ class Click:
         y = round(cfg.height * y, 2)
         return [x - offset_x, y - offset_y, offset_x, offset_y]
 
+    @control_tragger
     def click_rate(self, x, y, offset_x=5, offset_y=5):
         time.sleep(cfg.sleep_time)
         target = self.trans_from_rate_to_position(
@@ -34,8 +62,9 @@ class Click:
             {f"just_click_{random_num}": {"action": "Click", "target": target}},
         )
         logger.debug(f"Clicked {target}")
-        return (target, detail)
+        return detail
 
+    @control_tragger
     def ocr_click(self, text, sleep_time=cfg.sleep_time, roi=[0, 0, 0, 0]):
         time.sleep(sleep_time)
         random_num = random.random()
@@ -62,27 +91,28 @@ class Click:
         logger.debug(f"Click_{text} Finish")
         return detail
 
+    @control_tragger
     def return_home(self):
-        time.sleep(cfg.sleep_time)
         logger.debug("ReturnHome Start")
         detail = self.click_rate(0.15, 0.1)
         logger.debug("ReturnHome Finish")
         return detail
 
+    @control_tragger
     def back(self):
-        time.sleep(cfg.sleep_time)
         logger.debug("Back Start")
         detail = self.click_rate(0.04, 0.06)
         logger.debug("Back Finish")
         return detail
 
+    @control_tragger
     def click_blink(self):
-        time.sleep(cfg.sleep_time)
         logger.debug("ClickBlink Start")
         detail = self.click_rate(0.6, 0.97)
         logger.debug("ClickBlink Finish")
         return detail
 
+    @control_tragger
     def swape(self, start, end, duration):
         if start[0] < 1:
             start[0] = start[0] * cfg.width
@@ -107,6 +137,7 @@ class Click:
         logger.debug(f"StartSwape_{random_num} Finish")
         return detail
 
+    @control_tragger  # TODO : check_stage_return_home
     def check_stage_return_home(self, stage_name):
         time.sleep(cfg.sleep_time)
         logger.debug(f"CheckStage_{stage_name} Start")
@@ -114,6 +145,7 @@ class Click:
         logger.debug(f"CheckStage_{stage_name} Finish")
         return detail
 
+    @control_tragger
     def ocr_rate_click(
         self,
         text,
@@ -139,5 +171,5 @@ class Click:
         )
         logger.debug(f"Search_{text} Finish")
         if detail and detail.status.succeeded:
-            last_detail = self.click_rate(x, y, offset_x, offset_y)
-            return last_detail[1]
+            return self.click_rate(x, y, offset_x, offset_y)
+        return detail
