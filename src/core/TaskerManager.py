@@ -11,6 +11,7 @@ from maa.context import Context
 
 from src.utils.configs import cfg
 from src.utils.adb import change_size
+from src.utils.model import StopException
 
 
 class MyCustomAction(CustomAction):
@@ -43,7 +44,7 @@ class TaskerManager:
 
         adb_devices = Toolkit.find_adb_devices(cfg.adb_dir)
         if not adb_devices:
-            print("No ADB device found.")
+            logger.error("No ADB device found.")
             exit()
 
         # for demo, we just use the first device
@@ -69,6 +70,16 @@ class TaskerManager:
     def add_action(self, custon_action: type[MyCustomAction]):
         self.custon_action[custon_action.name] = custon_action
         logger.debug(f"load {custon_action.name}")
+        original_run = custon_action.run
+
+        def warp_custom_stop(*args, **kwargs):
+            try:
+                return original_run(*args, **kwargs)
+            except StopException as e:
+                logger.warning("STOPPING!!!!")
+                return True
+
+        custon_action.run = warp_custom_stop
         return custon_action
 
     def _register_custom_action(self):

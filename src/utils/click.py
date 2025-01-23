@@ -7,6 +7,7 @@ from maa.context import Context
 from maa.define import TaskDetail, Status, MaaStatusEnum
 
 from src.utils.configs import cfg
+from src.utils.model import StopException
 
 STOP = queue.Queue()
 STOP.put(1)
@@ -17,17 +18,7 @@ def control_tragger(func):
         global STOP
         tragger = STOP.empty()
         if not tragger:
-            logger.warning("STOPPING!!!!")
-            if random.random() > 0.5:
-                status = MaaStatusEnum.succeeded
-            else:
-                status = MaaStatusEnum.failed
-            return TaskDetail(
-                task_id=-1,
-                nodes=[],
-                entry="",
-                status=Status(status=status),
-            )
+            raise StopException("STOPPING!!!!")
         return func(*args, **kwargs)
 
     return func_wrapper
