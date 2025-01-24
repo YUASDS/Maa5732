@@ -67,20 +67,22 @@ class TaskerManager:
         self.init_flag_queue.put(1)
         logger.info("Init successeed!!!")
 
-    def add_action(self, custon_action: type[MyCustomAction]):
-        self.custon_action[custon_action.name] = custon_action
-        logger.debug(f"load {custon_action.name}")
-        original_run = custon_action.run
+    def add_action(self, name: str):
+        def warp_action(custon_action: type[MyCustomAction]):
+            self.custon_action[name] = custon_action
+            logger.debug(f"load {name}")
+            original_run = custon_action.run
 
-        def warp_custom_stop(*args, **kwargs):
-            try:
-                return original_run(*args, **kwargs)
-            except StopException as e:
-                logger.warning("STOPPING!!!!")
-                return True
+            def warp_custom_stop(*args, **kwargs):
+                try:
+                    return original_run(*args, **kwargs)
+                except StopException as e:
+                    logger.warning("STOPPING!!!!")
+                    return True
 
-        custon_action.run = warp_custom_stop
-        return custon_action
+            custon_action.run = warp_custom_stop
+
+        return warp_action
 
     def _register_custom_action(self):
         for key, value in self.custon_action.items():
