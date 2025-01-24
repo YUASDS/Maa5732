@@ -8,10 +8,11 @@ from src.utils.configs import cfg
 from src.utils.click import Click
 from src.core.TaskerManager import TASKER_MANAGER, MyCustomAction
 
+name = __file__.split("\\")[-1].split(".")[0]
 
-@TASKER_MANAGER.add_action
+
+@TASKER_MANAGER.add_action(name)
 class Supervision(MyCustomAction):
-    name = __file__.split("\\")[-1].split(".")[0]
 
     def run(
         self,
@@ -23,7 +24,7 @@ class Supervision(MyCustomAction):
         :param context: 运行上下文
         :return: 是否执行成功。
         """
-        logger.info(f"{self.name} Start")
+        logger.info(f"{name} Start")
         clicker = Click(context)
         #  点击危机管理-OCR识别率低
         clicker.click_rate(0.74, 0.89)
@@ -43,7 +44,7 @@ class Supervision(MyCustomAction):
         clicker.ocr_click("一键领取", roi=[0.5, 0.5, 1, 1])
         clicker.click_rate(0.2, 0.3)
         clicker.return_home()
-        logger.info(f"{self.name} Finish")
+        logger.info(f"{name} Finish")
         return True
 
     def stop(self) -> None:

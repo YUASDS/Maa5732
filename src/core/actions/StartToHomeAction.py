@@ -7,10 +7,11 @@ from src.utils.configs import cfg
 from src.core.TaskerManager import TASKER_MANAGER, MyCustomAction
 from src.utils.click import Click
 
+name = __file__.split("\\")[-1].split(".")[0]
 
-@TASKER_MANAGER.add_action
+
+@TASKER_MANAGER.add_action(name)
 class StartToHomeAction(MyCustomAction):
-    name = __file__.split("\\")[-1].split(".")[0]
 
     def run(
         self,
@@ -22,15 +23,20 @@ class StartToHomeAction(MyCustomAction):
         :param context: 运行上下文
         :return: 是否执行成功。
         """
-        logger.info(f"{self.name} Start")
+        logger.info(f"{name} Start")
         logger.debug("Begin to click [0 0 100 100]")
         clicker = Click(context)
-        detail = clicker.ocr_rate_click("系统公告", 0.1, 0.1, 20, 20)
-        # 点击预设
-        if detail and detail.status.succeeded:
-            clicker.ocr_click("进入管理局")
-            # 等待进入
-            time.sleep(20)
+        clicker.ocr_rate_click("系统公告", 0.1, 0.1, 20, 20)
+        clicker.ocr_click("进入管理局")
+        # 等待进入
+        time.sleep(20)
+        while True:
+            detail = clicker.ocr_click("今日不再弹出")
+            status = detail.status.succeeded  # type: ignore
+            logger.debug(f"Click:今日不再弹出 {status}")
+            if not status:
+                break
+            clicker.click_blink()
         # 领取月卡
         detail = clicker.ocr_click("贵宾")
         if detail and detail.status.succeeded:
@@ -39,15 +45,8 @@ class StartToHomeAction(MyCustomAction):
         test_detail = clicker.ocr_rate_click("情绪检测", 0.625, 0.55)
         if test_detail and test_detail.status.succeeded:
             clicker.click_blink()
-        while True:
-            detail = clicker.ocr_click("今日不再弹出")
-            status = detail.status.succeeded  # type: ignore
-            logger.debug(f"Click:今日不再弹出 {status}")
-            if not status:
-                break
-            clicker.click_blink()
 
-        logger.info(f"{self.name} Finish")
+        logger.info(f"{name} Finish")
         return True
 
     def stop(self) -> None:

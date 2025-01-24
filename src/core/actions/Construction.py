@@ -6,7 +6,10 @@ from src.utils.configs import cfg
 from src.utils.click import Click
 
 
-@TASKER_MANAGER.add_action
+name = __file__.split("\\")[-1].split(".")[0]
+
+
+@TASKER_MANAGER.add_action(name)
 class Construction(MyCustomAction):
     name = __file__.split("\\")[-1].split(".")[0]
 
@@ -20,7 +23,7 @@ class Construction(MyCustomAction):
         :param context: 运行上下文
         :return: 是否执行成功。
         """
-        logger.info(f"{self.name} Start")
+        logger.info(f"{name} Start")
         clicker = Click(context)
         # 点击整备中心 OCR识别率低
         clicker.click_rate(0.829, 0.911)
@@ -33,7 +36,7 @@ class Construction(MyCustomAction):
         [clicker.click_rate(0.908, 0.889) for _ in range(40)]
 
         clicker.return_home()
-        logger.info(f"{self.name} Finish")
+        logger.info(f"{name} Finish")
         return True
 
     def stop(self) -> None:
