@@ -5,10 +5,11 @@ from src.core.TaskerManager import TASKER_MANAGER, MyCustomAction
 from src.utils.configs import cfg
 from src.utils.click import Click
 
+name = __file__.split("\\")[-1].split(".")[0]
 
-@TASKER_MANAGER.add_action
+
+@TASKER_MANAGER.add_action(name)
 class Friends(MyCustomAction):
-    name = __file__.split("\\")[-1].split(".")[0]
 
     def run(
         self,
@@ -20,7 +21,7 @@ class Friends(MyCustomAction):
         :param context: 运行上下文
         :return: 是否执行成功。
         """
-        logger.info(f"{self.name} Start")
+        logger.info(f"{name} Start")
         clicker = Click(context)
         # 点击整备中心
         clicker.click_rate(0.829, 0.911)
@@ -30,7 +31,7 @@ class Friends(MyCustomAction):
         # 赠送
         clicker.click_rate(0.898, 0.861)
         clicker.return_home()
-        logger.info(f"{self.name} Finish")
+        logger.info(f"{name} Finish")
         return True
 
     def stop(self) -> None:

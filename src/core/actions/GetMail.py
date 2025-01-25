@@ -5,11 +5,11 @@ from src.core.TaskerManager import TASKER_MANAGER, MyCustomAction
 from src.utils.configs import cfg
 from src.utils.click import Click
 
+name = __file__.split("\\")[-1].split(".")[0]
 
-@TASKER_MANAGER.add_action
+
+@TASKER_MANAGER.add_action(name)
 class GetMail(MyCustomAction):
-    name = __file__.split("\\")[-1].split(".")[0]
-
     def run(
         self,
         context: Context,
@@ -20,13 +20,13 @@ class GetMail(MyCustomAction):
         :param context: 运行上下文
         :return: 是否执行成功。
         """
-        logger.info(f"{self.name} Start")
+        logger.info(f"{name} Start")
         clicker = Click(context)
         clicker.ocr_click("邮箱")
         clicker.ocr_click("快速处理")
         clicker.click_blink()
         clicker.return_home()
-        logger.info(f"{self.name} Finish")
+        logger.info(f"{name} Finish")
         return True
 
     def stop(self) -> None:

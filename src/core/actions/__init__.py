@@ -1,6 +1,5 @@
 import src.core.actions.Bureau
 import src.core.actions.Construction
-import src.core.actions.DailyCheckin
 import src.core.actions.Friends
 import src.core.actions.GetMail
 import src.core.actions.Guild

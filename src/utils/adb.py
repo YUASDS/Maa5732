@@ -12,5 +12,5 @@ def change_size(adb_adress):
         stderr=PIPE,
     )
     pat = re.compile(r"\d{1,5}")
-    height, width = pat.findall(result.stdout.decode())
+    width, height = pat.findall(result.stdout.decode())
     cfg.width, cfg.height = int(width), int(height)

@@ -16,9 +16,11 @@ def gold_fight(context: Context):
     clicker.click_rate(0.9, 0.2)
 
 
-@TASKER_MANAGER.add_action
+name = __file__.split("\\")[-1].split(".")[0]
+
+
+@TASKER_MANAGER.add_action(name)
 class Raid(MyCustomAction):
-    name = __file__.split("\\")[-1].split(".")[0]
     action_dict = {
         "狄斯币": ["行动", "狂热"],
         "狂乱精粹": ["行动", "之种"],
@@ -41,7 +43,7 @@ class Raid(MyCustomAction):
         :param context: 运行上下文
         :return: 是否执行成功。
         """
-        logger.info(f"{self.name} Start")
+        logger.info(f"{name} Start")
         action_param = json.loads(argv.custom_action_param)
         run_param = default_cfg.copy()
         if action_param != {}:
@@ -56,7 +58,7 @@ class Raid(MyCustomAction):
             self.RaidDark()
         if run_param["RaidFightcheckBox"]:
             self.RaidFight(run_param["ResourceCombo"])
-        logger.info(f"{self.name} Finish")
+        logger.info(f"{name} Finish")
         return True
 
     def RaidDark(self):

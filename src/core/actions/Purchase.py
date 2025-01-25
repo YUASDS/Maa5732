@@ -8,10 +8,11 @@ from src.utils.configs import cfg
 from src.utils.click import Click
 from src.core.TaskerManager import TASKER_MANAGER, MyCustomAction
 
+name = __file__.split("\\")[-1].split(".")[0]
 
-@TASKER_MANAGER.add_action
+
+@TASKER_MANAGER.add_action(name)
 class Purchase(MyCustomAction):
-    name = __file__.split("\\")[-1].split(".")[0]
 
     def run(
         self,
@@ -23,19 +24,20 @@ class Purchase(MyCustomAction):
         :param context: 运行上下文
         :return: 是否执行成功。
         """
-        logger.info(f"{self.name} Start")
+        logger.info(f"{name} Start")
         click = Click(context)
         #  点击危机管理-OCR识别率低
         click.click_rate(0.74, 0.89)
         click.ocr_click("采购办")
         click.ocr_click("精选礼包")
+        click.ocr_click("常规补给")
         for _ in range(2):
             click.swape([0.965, 0.5, 10, 10], [0.1, 0.6, 10, 10], 1000)
         click.ocr_click("每日免费补给")
         click.ocr_click("购买")
         click.click_blink()
         click.return_home()
-        logger.info(f"{self.name} Finish")
+        logger.info(f"{name} Finish")
         return True
 
     def stop(self) -> None:
