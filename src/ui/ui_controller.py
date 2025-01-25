@@ -52,7 +52,6 @@ class MyWidget(QWidget):
         self.add_check_box(self.ui.PurchasecheckBox)
         self.add_check_box(self.ui.SupervisioncheckBox)
         self.add_check_box(self.ui.ConstructioncheckBox)
-        self.add_check_box(self.ui.DailyCheckincheckBox)
         self.add_check_box(self.ui.BureaucheckBox)
         self.add_check_box(self.ui.GetMailcheckBox)
 

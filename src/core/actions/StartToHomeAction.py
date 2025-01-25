@@ -24,12 +24,12 @@ class StartToHomeAction(MyCustomAction):
         :return: 是否执行成功。
         """
         logger.info(f"{name} Start")
-        logger.debug("Begin to click [0 0 100 100]")
         clicker = Click(context)
         clicker.ocr_rate_click("系统公告", 0.1, 0.1, 20, 20)
         clicker.ocr_click("进入管理局")
         # 等待进入
         time.sleep(20)
+        # 处理广告
         while True:
             detail = clicker.ocr_click("今日不再弹出")
             status = detail.status.succeeded  # type: ignore
@@ -41,10 +41,10 @@ class StartToHomeAction(MyCustomAction):
         detail = clicker.ocr_click("贵宾")
         if detail and detail.status.succeeded:
             clicker.click_blink()
-            # 情绪检测
-        test_detail = clicker.ocr_rate_click("情绪检测", 0.625, 0.55)
+        # 情绪检测
+        test_detail = clicker.ocr_rate_click("累计奖励", 0.625, 0.55)
         if test_detail and test_detail.status.succeeded:
-            clicker.click_blink()
+            clicker.back()
 
         logger.info(f"{name} Finish")
         return True

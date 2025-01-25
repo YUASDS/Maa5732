@@ -22,11 +22,11 @@ base_template = """{
                 "action": "custom",
                 "custom_action": "StartToHomeAction",
                 "custom_action_param": "StartToHomeActionCustom",
-                "next": "2"
+                "next": "3"
             },
             "2": {
                 "action": "custom",
-                "custom_action": "DailyCheckin",
+                "custom_action": "Nothing",
                 "next": "3"
             },
             "3": {
