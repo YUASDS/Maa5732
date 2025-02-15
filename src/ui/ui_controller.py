@@ -32,19 +32,21 @@ class MyWidget(QWidget):
 
         self.ui = Ui_Form()
         self.ui.setupUi(self)
+        # 为按钮添加点击事件 用于切换界面
         self.widget_button.append(self.ui.GuildButton)
         self.widget_button.append(self.ui.RaidButton)
         self.widget_button.append(self.ui.StartButton)
         self.widget_button.append(self.ui.FriendsButton)
         self.widget_button.append(self.ui.PurchaseButton)
         self.widget_button.append(self.ui.SupervisionButton)
+
         for button in self.widget_button:
             button.clicked.connect(self.buttonClick)
         self.ui.LinkStartButton.clicked.connect(self.start)
         self.ui.SlectAllButton.clicked.connect(self.select_all)
         self.ui.ClearAllButton.clicked.connect(self.clear_all)
         # nothing 不进行注册
-
+        # 对于checkBox进行注册 用于是否进行该项任务
         self.add_check_box(self.ui.GuildcheckBox)
         self.add_check_box(self.ui.RaidcheckBox)
         self.add_check_box(self.ui.StartToHomeActioncheckBox)
@@ -55,6 +57,7 @@ class MyWidget(QWidget):
         self.add_check_box(self.ui.BureaucheckBox)
         self.add_check_box(self.ui.GetMailcheckBox)
 
+        # 对每项任务的详细设置进行注册 格式为 任务名_设置名
         self.add_detail_box(self.ui.Purchase_ActivityShopcheckBox)
         self.add_detail_box(self.ui.Purchase_FreeShopcheckBox)
         self.add_detail_box(self.ui.Purchase_FriendShopcheckBox)
@@ -67,6 +70,8 @@ class MyWidget(QWidget):
         self.add_detail_box(self.ui.Guild_GuildCombo)
         self.add_detail_box(self.ui.Raid_ResourceCombo)
         self.add_detail_box(self.ui.Supervision_RewardCombo)
+        self.add_detail_box(self.ui.StartToHomeAction_ServerCheckcomboBox)
+        self.add_detail_box(self.ui.StartToHomeAction_StartAPPcheckBox)
         self.init_combo()
         self.load_from_json(cfg.settings)
 
@@ -82,7 +87,8 @@ class MyWidget(QWidget):
         self.detail_dict[action_name][action_setting] = obj
 
     def init_combo(self):
-
+        # 为下拉框添加选项
+        self.ui.StartToHomeAction_ServerCheckcomboBox.addItems(["B服", "官服"])
         self.ui.Guild_GuildCombo.addItems(["狄斯币", "异方晶"])
         self.ui.Raid_ResourceCombo.addItems(
             [

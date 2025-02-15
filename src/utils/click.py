@@ -56,7 +56,9 @@ class Click:
         return detail
 
     @control_tragger
-    def ocr_click(self, text, sleep_time=cfg.sleep_time, roi=[0, 0, 0, 0]):
+    def ocr_click(self, text, sleep_time=cfg.sleep_time, roi=None):
+        if roi is None:
+            roi = [0, 0, 0, 0]
         time.sleep(sleep_time)
         random_num = random.random()
         if roi != [0, 0, 0, 0]:
@@ -138,15 +140,10 @@ class Click:
 
     @control_tragger
     def ocr_rate_click(
-        self,
-        text,
-        x,
-        y,
-        offset_x=5,
-        offset_y=5,
-        sleep_time=cfg.sleep_time,
-        roi=[0, 0, 0, 0],
+        self, text, x, y, offset_x=5, offset_y=5, sleep_time=cfg.sleep_time, roi=None
     ):
+        if roi is None:
+            roi = [0, 0, 0, 0]
         time.sleep(sleep_time)
         logger.debug(f"StartSearch: {text}")
         detail = self.context.run_task(
@@ -163,4 +160,53 @@ class Click:
         logger.debug(f"Search_{text} Finish")
         if detail and detail.status.succeeded:
             return self.click_rate(x, y, offset_x, offset_y)
+        return detail
+
+    @control_tragger
+    def start_5732(self, name):
+        logger.debug("Start 5732")
+        trans_dict = {"B服": "bilibili", "官服": "cn"}
+        server = trans_dict[name]
+        package = (
+            f"com.zy.wqmt.{server}/com.papegames.gamelib_unity.BaseUnityImplActivity"
+        )
+        detail = self.context.run_task(
+            "Start 5732",
+            {
+                "Start 5732": {
+                    "action": "StartApp",
+                    "package": package,
+                }
+            },
+        )
+        logger.debug("Start 5732 Finish")
+
+    @control_tragger
+    def TemplateMatch(
+        self,
+        template: str,
+        threshold: float = 0.7,
+        green_mask: bool = False,
+        roi: list[float] = None,  # type:ignore
+    ):
+        "颜色模板匹配"
+        if roi is None:
+            roi = [0, 0, 1, 1]
+        time.sleep(cfg.sleep_time)
+        random_num = random.random()
+        logger.debug(f"StartTemplateMatch_{random_num}:{template} {threshold}")
+        detail = self.context.run_task(
+            f"template_match_{random_num}",
+            {
+                f"template_match_{random_num}": {
+                    "recognition": "FeatureMatch",
+                    "action": "Click",
+                    "template": template,
+                    "roi": roi,
+                    "threshold": threshold,
+                    "green_mask": green_mask,
+                }
+            },
+        )
+        logger.debug(f"TemplateMatch_{random_num} Finish")
         return detail

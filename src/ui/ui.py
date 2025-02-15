@@ -200,10 +200,28 @@ class Ui_Form(object):
         self.horizontalLayout_14.setObjectName(u"horizontalLayout_14")
         self.stackedWidget = QStackedWidget(self.SettingBox)
         self.stackedWidget.setObjectName(u"stackedWidget")
+        self.stackedWidget.setCursor(QCursor(Qt.CursorShape.ArrowCursor))
         self.StartToHomeAction = QWidget()
         self.StartToHomeAction.setObjectName(u"StartToHomeAction")
-        self.StartToHomeAction.setEnabled(False)
+        self.StartToHomeAction.setEnabled(True)
+        self.StartToHomeAction.setCursor(QCursor(Qt.CursorShape.ArrowCursor))
         self.StartToHomeAction.setContextMenuPolicy(Qt.ContextMenuPolicy.ActionsContextMenu)
+        self.verticalLayout_12 = QVBoxLayout(self.StartToHomeAction)
+        self.verticalLayout_12.setObjectName(u"verticalLayout_12")
+        self.StartToHomeAction_StartAPPcheckBox = QCheckBox(self.StartToHomeAction)
+        self.StartToHomeAction_StartAPPcheckBox.setObjectName(u"StartToHomeAction_StartAPPcheckBox")
+        self.StartToHomeAction_StartAPPcheckBox.setCheckable(True)
+        self.StartToHomeAction_StartAPPcheckBox.setChecked(False)
+
+        self.verticalLayout_12.addWidget(self.StartToHomeAction_StartAPPcheckBox)
+
+        self.StartToHomeAction_ServerCheckcomboBox = QComboBox(self.StartToHomeAction)
+        self.StartToHomeAction_ServerCheckcomboBox.setObjectName(u"StartToHomeAction_ServerCheckcomboBox")
+        self.StartToHomeAction_ServerCheckcomboBox.setEnabled(True)
+        self.StartToHomeAction_ServerCheckcomboBox.setEditable(False)
+
+        self.verticalLayout_12.addWidget(self.StartToHomeAction_ServerCheckcomboBox)
+
         self.stackedWidget.addWidget(self.StartToHomeAction)
         self.Guild = QWidget()
         self.Guild.setObjectName(u"Guild")
@@ -267,7 +285,6 @@ class Ui_Form(object):
         self.verticalLayout_4.addWidget(self.Friends_AutoLikecheckBox)
 
         self.verticalLayout_4.setStretch(0, 1)
-        self.verticalLayout_4.setStretch(1, 1)
 
         self.verticalLayout_5.addLayout(self.verticalLayout_4)
 
@@ -401,6 +418,7 @@ class Ui_Form(object):
         self.SlectAllButton.setText(QCoreApplication.translate("Form", u"\u5168\u9009", None))
         self.ClearAllButton.setText(QCoreApplication.translate("Form", u"\u6e05\u7a7a", None))
         self.SettingBox.setTitle("")
+        self.StartToHomeAction_StartAPPcheckBox.setText(QCoreApplication.translate("Form", u"\u542f\u52a8\u6e38\u620f", None))
         self.Purchase_FriendShopcheckBox.setText(QCoreApplication.translate("Form", u"\u53cb\u60c5\u70b9\u5546\u5e97", None))
         self.Purchase_ActivityShopcheckBox.setText(QCoreApplication.translate("Form", u"\u6d3b\u52a8\u5546\u5e97", None))
         self.Purchase_FreeShopcheckBox.setText(QCoreApplication.translate("Form", u"\u514d\u8d39\u4f53\u529b", None))

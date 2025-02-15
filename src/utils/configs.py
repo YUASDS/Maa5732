@@ -3,11 +3,7 @@ import os
 import time
 
 # 动态参数
-## 常用参数
 curr_dir = os.getcwd()
-default_threshold = 0.85
-## 环境参数
-
 adb_dir = os.path.join(curr_dir, "assets", "adb", "adb.exe")
 scrn_dir = os.path.join(curr_dir, "screenshot.png")  # 截图后用于识别
 ## 当前日期
@@ -79,9 +75,8 @@ base_template = """{
 
 # 从Config取值，当前程序专用
 def load_config():
-    with open(
-        os.path.join(curr_dir, "assets", "config", "config.json"), "r", encoding="utf-8"
-    ) as f:
+    confg_path = os.path.join(curr_dir, "assets", "config", "config.json")
+    with open(confg_path, "r", encoding="utf-8") as f:
         config = json.load(f)
     return config
 
