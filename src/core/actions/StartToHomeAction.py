@@ -25,10 +25,16 @@ class StartToHomeAction(MyCustomAction):
         """
         logger.info(f"{name} Start")
         clicker = Click(context)
+        if cfg.settings[1][name]["StartAPPcheckBox"]:
+            clicker.start_5732(cfg.settings[1][name]["ServerCheckcomboBox"])
+            time.sleep(25)
         clicker.ocr_rate_click("系统公告", 0.1, 0.1, 20, 20)
-        clicker.ocr_click("进入管理局")
+        detail = clicker.ocr_click("进入管理局")
+        if not detail or not detail.status.succeeded:
+            time.sleep(10)
+            clicker.ocr_click("进入管理局")
         # 等待进入
-        time.sleep(20)
+        time.sleep(30)
         # 处理广告
         while True:
             detail = clicker.ocr_click("今日不再弹出")
@@ -36,13 +42,14 @@ class StartToHomeAction(MyCustomAction):
             logger.debug(f"Click:今日不再弹出 {status}")
             if not status:
                 break
-            clicker.click_blink()
+            clicker.back()
         # 领取月卡
         detail = clicker.ocr_click("贵宾")
         if detail and detail.status.succeeded:
             clicker.click_blink()
         # 情绪检测
         test_detail = clicker.ocr_rate_click("累计奖励", 0.625, 0.55)
+        time.sleep(10)
         if test_detail and test_detail.status.succeeded:
             clicker.back()
 

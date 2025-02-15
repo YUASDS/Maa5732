@@ -8,6 +8,7 @@ from maa.toolkit import Toolkit
 from maa.custom_action import CustomAction
 from maa.define import MaaAdbInputMethodEnum
 from maa.context import Context
+from maa.notification_handler import NotificationHandler, NotificationType
 
 from src.utils.configs import cfg
 from src.utils.adb import change_size
@@ -22,6 +23,49 @@ class MyCustomAction(CustomAction):
 
     def stop(self) -> None:
         pass
+
+
+class MyNotificationHandler(NotificationHandler):
+    def on_resource_loading(
+        self,
+        noti_type: NotificationType,
+        detail: NotificationHandler.ResourceLoadingDetail,
+    ):
+        print(f"on_resource_loading: {noti_type}, {detail}")
+
+    def on_controller_action(
+        self,
+        noti_type: NotificationType,
+        detail: NotificationHandler.ControllerActionDetail,
+    ):
+        print(f"on_controller_action: {noti_type}, {detail}")
+
+    def on_tasker_task(
+        self, noti_type: NotificationType, detail: NotificationHandler.TaskerTaskDetail
+    ):
+        print(f"on_tasker_task: {noti_type}, {detail}")
+
+    def on_node_next_list(
+        self,
+        noti_type: NotificationType,
+        detail: NotificationHandler.NodeNextListDetail,
+    ):
+        print(f"on_node_next_list: {noti_type}, {detail}")
+
+    def on_node_recognition(
+        self,
+        noti_type: NotificationType,
+        detail: NotificationHandler.NodeRecognitionDetail,
+    ):
+        print(f"on_node_recognition: {noti_type}, {detail}")
+
+    def on_node_action(
+        self, noti_type: NotificationType, detail: NotificationHandler.NodeActionDetail
+    ):
+        print(f"on_node_action: {noti_type}, {detail}")
+
+    def on_unknown_notification(self, msg: str, details: dict):
+        print(f"on_unknown_notification: {msg}, {details}")
 
 
 class TaskerManager:
@@ -61,7 +105,7 @@ class TaskerManager:
         )
         self.controller.post_connection().wait()
         self.tasker = Tasker()
-        # tasker = Tasker(notification_handler=MyNotificationHandler())
+        # self.tasker = Tasker(notification_handler=MyNotificationHandler())
         self.tasker.bind(self.resource, self.controller)
         self._register_custom_action()
         self.init_flag_queue.put(1)
@@ -77,7 +121,7 @@ class TaskerManager:
                 try:
                     return original_run(*args, **kwargs)
                 except StopException as e:
-                    logger.warning("STOPPING!!!!")
+                    logger.warning("STOPPED!!!!")
                     return True
 
             custon_action.run = warp_custom_stop
