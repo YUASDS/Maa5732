@@ -1,3 +1,5 @@
+import time
+
 from loguru import logger
 from maa.context import Context
 
@@ -31,6 +33,8 @@ class Bureau(MyCustomAction):
         clicker.ocr_click("一键领取")
         clicker.click_rate(0.9, 0.6)
         clicker.ocr_click("一键")
+        # 加载派遣动画
+        time.sleep(3)
         clicker.back()
         # 体力
         clicker.click_rate(0.156, 0.458)
