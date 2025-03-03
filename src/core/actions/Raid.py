@@ -76,7 +76,7 @@ class Raid(MyCustomAction):
 
     def RaidRiver(self):
         logger.info("RaidRiver Start")
-        self.RiverFight("记忆风暴", "点")
+        self.RiverFight("记忆风暴", "点","5")
         logger.info("RaidRiver Finish")
 
     def RaidFight(self, ResourceCombo: str):
@@ -84,14 +84,14 @@ class Raid(MyCustomAction):
         self.RiverFight(*self.action_dict[ResourceCombo])
         logger.info("RaidFight Finish")
 
-    def RiverFight(self, first_action, second_action):
+    def RiverFight(self, first_action, second_action,level="4"):
         # 选择锈河副本 - 第一次点击的文本 第二次点击的文本
         clicker = self.clicker
         clicker.click_rate(0.9, 0.2)
         clicker.ocr_click("锈河")
         clicker.ocr_click(first_action)
         clicker.ocr_click(second_action)
-        clicker.ocr_click("4")
+        clicker.ocr_click(level, roi=[0, 0.5, 1, 1])
         clicker.ocr_click("连续扫荡")
         # 当体力副本无体力时
         detail = clicker.ocr_click("取消")
