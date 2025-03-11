@@ -76,7 +76,8 @@ class Raid(MyCustomAction):
 
     def RaidRiver(self):
         logger.info("RaidRiver Start")
-        self.RiverFight("记忆风暴", "点","5")
+        self.RiverFight("记忆风暴", "点", "MS")
+        # MS-r5
         logger.info("RaidRiver Finish")
 
     def RaidFight(self, ResourceCombo: str):
@@ -103,7 +104,6 @@ class Raid(MyCustomAction):
 
         clicker.ocr_click("开始扫荡")
         clicker.ocr_click("完成", 10)
-        clicker.click_blink()
         clicker.return_home()
 
     def stop(self) -> None:
