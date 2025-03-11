@@ -52,6 +52,8 @@ class Click:
             f"just_click_{random_num}",
             {f"just_click_{random_num}": {"action": "Click", "target": target}},
         )
+        if detail and not detail.status.succeeded:
+            logger.warning(f"just_click_{random_num} Failed")
         logger.debug(f"Clicked {target}")
         return detail
 
@@ -81,6 +83,8 @@ class Click:
                 }
             },
         )
+        if detail and not detail.status.succeeded:
+            logger.warning(f"Click_{text} Failed")
         logger.debug(f"Click_{text} Finish")
         return detail
 
@@ -127,6 +131,8 @@ class Click:
                 }
             },
         )
+        if detail and not detail.status.succeeded:
+            logger.warning(f"StartSwape_{random_num} Failed")
         logger.debug(f"StartSwape_{random_num} Finish")
         return detail
 
@@ -157,6 +163,8 @@ class Click:
                 }
             },
         )
+        if detail and not detail.status.succeeded:
+            logger.warning(f"Search_{text} Failed")
         logger.debug(f"Search_{text} Finish")
         if detail and detail.status.succeeded:
             return self.click_rate(x, y, offset_x, offset_y)
@@ -179,6 +187,8 @@ class Click:
                 }
             },
         )
+        if detail and not detail.status.succeeded:
+            logger.warning("Start 5732 Failed")
         logger.debug("Start 5732 Finish")
 
     @control_tragger
@@ -208,5 +218,7 @@ class Click:
                 }
             },
         )
+        if detail and not detail.status.succeeded:
+            logger.warning(f"TemplateMatch_{random_num} Failed")
         logger.debug(f"TemplateMatch_{random_num} Finish")
         return detail

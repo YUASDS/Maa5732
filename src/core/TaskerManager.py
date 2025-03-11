@@ -85,8 +85,9 @@ class TaskerManager:
         self.resource = Resource()
         res_job = self.resource.post_bundle("assets/resource")
         res_job.wait()
-
-        adb_devices = Toolkit.find_adb_devices(cfg.adb_dir)
+        adb_devices = Toolkit.find_adb_devices()
+        if not adb_devices:
+            adb_devices = Toolkit.find_adb_devices(cfg.adb_dir)
         if not adb_devices:
             logger.error("No ADB device found.")
             exit()
