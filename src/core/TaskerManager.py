@@ -85,17 +85,15 @@ class TaskerManager:
         self.resource = Resource()
         res_job = self.resource.post_bundle("assets/resource")
         res_job.wait()
-        adb_devices = Toolkit.find_adb_devices()
-        if not adb_devices:
-            adb_devices = Toolkit.find_adb_devices(cfg.adb_dir)
+        adb_devices = Toolkit.find_adb_devices() or Toolkit.find_adb_devices(
+            cfg.adb_dir
+        )
         if not adb_devices:
             logger.error("No ADB device found.")
             exit()
 
         # for demo, we just use the first device
         device = adb_devices[0]
-        # 自适应分辨率
-        change_size(device.address)
         self.controller = AdbController(
             adb_path=device.adb_path,
             address=device.address,
