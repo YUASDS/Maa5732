@@ -92,7 +92,7 @@ class TaskerManager:
             logger.error("No ADB device found.")
             exit()
 
-        # for demo, we just use the first device
+       
         device = adb_devices[0]
         self.controller = AdbController(
             adb_path=device.adb_path,
