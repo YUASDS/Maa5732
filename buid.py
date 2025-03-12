@@ -3,7 +3,7 @@ import os
 import site
 import shutil
 import zipfile
-
+from src.core import version
 # 获取当前工作目录
 current_dir = os.getcwd()
 
@@ -44,7 +44,7 @@ PyInstaller.__main__.run(
     [
         "main.py",
         "--onefile",
-        "--name=MAA_5732.exe",
+        f"--name=MAA_5732_{version}.exe",
         f"--add-data={add_data_param}",
         f"--add-data={add_data_param2}",
         "--clean",
@@ -75,7 +75,7 @@ shutil.copytree(assets_source_path, assets_dest_path)
 #     raise FileNotFoundError("syc.bat file not found")
 
 # 压缩 dist 文件夹为 zip 文件，并保存在 dist 目录中
-zip_filename = "MAA_5732_RELEASE.zip"
+zip_filename = f"MAA_5732_{version}.zip"
 zip_filepath = os.path.join(dist_dir, zip_filename)
 
 with zipfile.ZipFile(zip_filepath, "w", zipfile.ZIP_DEFLATED) as zipf:

@@ -103,7 +103,11 @@ class Raid(MyCustomAction):
             return
 
         clicker.ocr_click("开始扫荡")
-        clicker.ocr_click("完成", 10)
+        import time
+        time.sleep(10)
+        # 升级的情况
+        clicker.click_rate(0.5, 0.1)
+        clicker.ocr_click("完成")
         clicker.return_home()
 
     def stop(self) -> None:
