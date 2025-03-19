@@ -31,9 +31,9 @@ class Guild(MyCustomAction):
         # 秘盟
         click.click_rate(0.9, 0.3)
         # 首次进入 领取奖励
-        click.click_rate(0.9, 0.7)
-        click.click_rate(0.9, 0.7)
-
+        click.click_rate(0.5, 0.08)
+        time.sleep(2)
+        click.ocr_rate_click("签到", 0.9, 0.7)
         click.ocr_click("秘盟捐赠")
         click.ocr_click("全部", roi=[0, 0, 0.3, 1])
         click.click_blink()

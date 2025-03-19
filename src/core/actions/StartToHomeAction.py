@@ -52,7 +52,7 @@ class StartToHomeAction(MyCustomAction):
         time.sleep(10)
         if test_detail and test_detail.status.succeeded:
             clicker.back()
-
+        clicker.ocr_click("确定")
         logger.info(f"{name} Finish")
         return True
 
