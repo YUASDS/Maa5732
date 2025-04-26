@@ -69,6 +69,8 @@ class MyWidget(QWidget):
 
         self.add_detail_box(self.ui.Guild_GuildCombo)
         self.add_detail_box(self.ui.Raid_ResourceCombo)
+        self.add_detail_box(self.ui.Raid_ResourceLevelCombo)
+        self.add_detail_box(self.ui.Raid_StromLevelCombo)
         self.add_detail_box(self.ui.Supervision_RewardCombo)
         self.add_detail_box(self.ui.StartToHomeAction_ServerCheckcomboBox)
         self.add_detail_box(self.ui.StartToHomeAction_StartAPPcheckBox)
@@ -104,6 +106,8 @@ class MyWidget(QWidget):
                 "启迪源质",
             ]
         )
+        self.ui.Raid_ResourceLevelCombo.addItems(["1", "2", "3", "4", "5"])
+        self.ui.Raid_StromLevelCombo.addItems(["1", "2", "3", "4", "5"])
         self.ui.Supervision_RewardCombo.addItems(["体力", "监察徽印"])
 
     def checkBox(self):

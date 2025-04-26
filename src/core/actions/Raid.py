@@ -1,4 +1,5 @@
 import json
+import time
 from loguru import logger
 from maa.context import Context
 
@@ -6,7 +7,13 @@ from src.core.TaskerManager import TASKER_MANAGER, MyCustomAction
 from src.utils.configs import cfg
 from src.utils.click import Click
 
-default_cfg = {"RaidRiver": True, "RaidDark": True, "RaidFight": {"resource": "狄斯币"}}
+default_cfg = {
+    "RaidRiver": True,
+    "RaidDark": True,
+    "ResourceCombo": "狄斯币",
+    "ResourceLevelCombo": "4",
+    "StromLevelCombo": "5",
+}
 
 action_dict = {}
 
@@ -33,6 +40,7 @@ class Raid(MyCustomAction):
         "精准源质": ["废墟", "精准"],
         "启迪源质": ["废墟", "启迪"],
     }
+    run_param: dict = default_cfg.copy()
 
     def run(
         self,
@@ -49,6 +57,7 @@ class Raid(MyCustomAction):
         run_param = default_cfg.copy()
         if action_param != {}:
             run_param = action_param
+            self.run_param = run_param
         clicker = Click(context)
         # 点击危机管理
         self.clicker = clicker
@@ -58,7 +67,7 @@ class Raid(MyCustomAction):
         if run_param["RaidDarkcheckBox"]:
             self.RaidDark()
         if run_param["RaidFightcheckBox"]:
-            self.RaidFight(run_param["ResourceCombo"])
+            self.RaidFight()
         logger.info(f"{name} Finish")
         return True
 
@@ -78,23 +87,36 @@ class Raid(MyCustomAction):
 
     def RaidRiver(self):
         logger.info("RaidRiver Start")
-        self.RiverFight("记忆风暴", "点", "MS")
+        self.RiverFight("记忆风暴", "点")
         # MS-r5
         logger.info("RaidRiver Finish")
 
-    def RaidFight(self, ResourceCombo: str):
+    def RaidFight(self):
+        ResourceCombo = self.run_param["ResourceCombo"]
         logger.info(f"RaidFight Start Resource: {ResourceCombo}")
         self.RiverFight(*self.action_dict[ResourceCombo])
         logger.info("RaidFight Finish")
 
-    def RiverFight(self, first_action, second_action,level="4"):
+    def RiverFight(self, first_action, second_action):
         # 选择锈河副本 - 第一次点击的文本 第二次点击的文本
+        level = self.run_param["ResourceLevelCombo"]
         clicker = self.clicker
         clicker.click_rate(0.9, 0.2)
         clicker.ocr_click("锈河")
         clicker.ocr_click(first_action)
         clicker.ocr_click(second_action)
-        clicker.ocr_click(level, roi=[0, 0.5, 1, 1])
+        if second_action == "极域" and level >= "4":
+            level = "3"
+        if first_action == "记忆风暴":
+            level = self.run_param["StromLevelCombo"]
+            if level == "5":
+                level = "MS"
+                clicker.ocr_click(level, roi=[0, 0.5, 1, 1])
+            else:
+                clicker.click_rate(0.7, 0.3)
+                clicker.ocr_click(level, roi=[0, 0.41, 1, 0.2])
+        else:
+            clicker.ocr_click(level, roi=[0, 0.5, 1, 1])
         clicker.ocr_click("连续扫荡")
         # 当体力副本无体力时
         detail = clicker.ocr_click("取消")
@@ -105,7 +127,6 @@ class Raid(MyCustomAction):
             return
 
         clicker.ocr_click("开始扫荡")
-        import time
         time.sleep(10)
         # 升级的情况
         clicker.click_rate(0.5, 0.1)
