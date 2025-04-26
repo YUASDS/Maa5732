@@ -68,6 +68,7 @@ class Raid(MyCustomAction):
         # 进入战斗
         clicker.click_rate(0.9, 0.2)
         clicker.ocr_click("内海")
+        clicker.swape([0.8, 0.5, 10, 10], [0.1, 0.3, 10, 10], 0.8)
         clicker.ocr_click("浊暗之阱")
         clicker.ocr_click("浊暗", roi=[0.25, 0, 0.75, 1])
         clicker.ocr_click("扫荡")
