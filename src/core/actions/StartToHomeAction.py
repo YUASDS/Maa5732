@@ -53,6 +53,7 @@ class StartToHomeAction(MyCustomAction):
         if test_detail and test_detail.status.succeeded:
             clicker.back()
         clicker.ocr_click("确定")
+        clicker.ocr_rate_click("购买礼包", 0.902, 0.062)
         logger.info(f"{name} Finish")
         return True
 

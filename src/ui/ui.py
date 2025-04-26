@@ -307,6 +307,11 @@ class Ui_Form(object):
 
         self.verticalLayout_7.addWidget(self.Raid_RaidRivercheckBox)
 
+        self.Raid_StromLevelCombo = QComboBox(self.Raid)
+        self.Raid_StromLevelCombo.setObjectName(u"Raid_StromLevelCombo")
+
+        self.verticalLayout_7.addWidget(self.Raid_StromLevelCombo)
+
         self.Raid_RaidFightcheckBox = QCheckBox(self.Raid)
         self.Raid_RaidFightcheckBox.setObjectName(u"Raid_RaidFightcheckBox")
 
@@ -316,6 +321,11 @@ class Ui_Form(object):
         self.Raid_ResourceCombo.setObjectName(u"Raid_ResourceCombo")
 
         self.verticalLayout_7.addWidget(self.Raid_ResourceCombo)
+
+        self.Raid_ResourceLevelCombo = QComboBox(self.Raid)
+        self.Raid_ResourceLevelCombo.setObjectName(u"Raid_ResourceLevelCombo")
+
+        self.verticalLayout_7.addWidget(self.Raid_ResourceLevelCombo)
 
 
         self.verticalLayout_9.addLayout(self.verticalLayout_7)
@@ -391,7 +401,7 @@ class Ui_Form(object):
         self.retranslateUi(Form)
 
         self.tabWidget.setCurrentIndex(0)
-        self.stackedWidget.setCurrentIndex(0)
+        self.stackedWidget.setCurrentIndex(4)
 
 
         QMetaObject.connectSlotsByName(Form)
