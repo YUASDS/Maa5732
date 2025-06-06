@@ -91,7 +91,7 @@ class Click:
     @control_tragger
     def return_home(self):
         logger.debug("ReturnHome Start")
-        detail = self.click_rate(0.15, 0.1)
+        detail = self.click_rate(0.15, 0.061)
         logger.debug("ReturnHome Finish")
         return detail
 
