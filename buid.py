@@ -4,6 +4,7 @@ import site
 import shutil
 import zipfile
 from src.core import version
+
 # 获取当前工作目录
 current_dir = os.getcwd()
 
@@ -48,6 +49,7 @@ PyInstaller.__main__.run(
         f"--add-data={add_data_param}",
         f"--add-data={add_data_param2}",
         "--clean",
+        "--uac-admin",
     ]
 )
 
