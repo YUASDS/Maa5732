@@ -199,9 +199,9 @@ class Click:
         green_mask: bool = False,
         roi: list[float] = None,  # type:ignore
     ):
-        "颜色模板匹配"
+        "模板匹配"
         if roi is None:
-            roi = [0, 0, 1, 1]
+            roi = [0, 0, 0, 0]
         time.sleep(cfg.sleep_time)
         random_num = random.random()
         logger.debug(f"StartTemplateMatch_{random_num}:{template} {threshold}")
@@ -209,7 +209,7 @@ class Click:
             f"template_match_{random_num}",
             {
                 f"template_match_{random_num}": {
-                    "recognition": "FeatureMatch",
+                    "recognition": "TemplateMatch",
                     "action": "Click",
                     "template": template,
                     "roi": roi,

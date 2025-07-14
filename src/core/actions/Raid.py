@@ -131,6 +131,20 @@ class Raid(MyCustomAction):
         # 升级的情况
         clicker.click_rate(0.5, 0.1)
         clicker.ocr_click("完成")
+        # 继续扫荡
+        clicker.ocr_click("连续扫荡")
+        # 当体力副本无体力时
+        detail = clicker.ocr_click("取消")
+        if detail and detail.status.succeeded:
+            clicker.click_blink()
+            clicker.return_home()
+            logger.warning("资源不足 取消扫荡")
+            return
+        clicker.ocr_click("开始扫荡")
+        time.sleep(10)
+        # 升级的情况
+        clicker.click_rate(0.5, 0.1)
+        clicker.ocr_click("完成")
         clicker.return_home()
 
     def stop(self) -> None:

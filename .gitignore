@@ -6,7 +6,7 @@ __pycache__/
 # custom ignore
 test
 assets
-*.ui
+
 
 # C extensions
 *.so
