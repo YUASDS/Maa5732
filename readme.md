@@ -1,7 +1,8 @@
 # MAA5732
 
-<p align="center">
+<div><p align="center">
 <img src="src/ui/logo.ico" /></p></div>
+
 Base on [MaaFramwork](https://github.com/MaaXYZ/MaaFramework)
 部分代码参考了 [MaaYYS](https://github.com/TanyaShue/MaaYYs)图标来源于网络，如有侵权，请联系删除。
 <!-- markdownlint-disable MD033 MD041 -->
