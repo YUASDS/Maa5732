@@ -50,6 +50,7 @@ PyInstaller.__main__.run(
         f"--add-data={add_data_param2}",
         "--clean",
         "--uac-admin",
+        "--icon=src/ui/logo.ico",
     ]
 )
 
