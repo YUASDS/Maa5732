@@ -199,7 +199,7 @@ class Click:
         green_mask: bool = False,
         roi: list[float] = None,  # type:ignore
     ):
-        "颜色模板匹配"
+        "模板匹配"
         if roi is None:
             roi = [0, 0, 0, 0]
         time.sleep(cfg.sleep_time)
