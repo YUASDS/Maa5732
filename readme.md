@@ -1,6 +1,6 @@
 # MAA5732
 
-![夏音](src\ui\logo.ico)
+![夏音](src/ui/logo.ico)
 
 Base on [MaaFramwork](https://github.com/MaaXYZ/MaaFramework)
 部分代码参考了 [MaaYYS](https://github.com/TanyaShue/MaaYYs)图标来源于网络，如有侵权，请联系删除。
