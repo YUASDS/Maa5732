@@ -62,7 +62,7 @@ class Ui_Form(object):
             Form.setObjectName("Form")
         Form.resize(642, 543)
         icon = QIcon()
-        icon.addFile("src/ui/logo.ico", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        icon.addFile("assets/resource/image/logo.ico", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         Form.setWindowIcon(icon)
         self.verticalLayout_3 = QVBoxLayout(Form)
         self.verticalLayout_3.setObjectName("verticalLayout_3")
