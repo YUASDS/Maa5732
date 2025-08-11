@@ -1,5 +1,7 @@
 # 导入sys
 import sys
+import re
+from functools import partial
 from typing import Union
 from loguru import logger
 from PySide6.QtWidgets import QApplication, QWidget, QPushButton, QCheckBox, QComboBox
@@ -12,6 +14,24 @@ from src.core.ThreadManager import TaskerThread
 
 class MySignal(QObject):
     button = Signal(QPushButton, str)
+
+
+class LogSignals(QObject):
+    log_message = Signal(str)
+
+
+# 去除ANSI颜色代码的辅助函数
+def remove_ansi_codes(text):
+    ansi_escape = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
+    return ansi_escape.sub("", text)
+
+
+# 自定义日志处理器函数
+def log_to_textbrowser(message, signals):
+    """处理日志消息并发送到TextBrowser"""
+    cleaned_message = remove_ansi_codes(message.record["message"])
+    print(cleaned_message)  # 打印到控制台
+    signals.log_message.emit(cleaned_message)
 
 
 # 继承QWidget类,以获取其属性和方法
@@ -32,6 +52,15 @@ class MyWidget(QWidget):
 
         self.ui = Ui_Form()
         self.ui.setupUi(self)
+
+        self.text_browser = self.ui.textBrowser
+        # 创建日志信号对象
+        self.log_signals = LogSignals()
+        # 连接信号到文本追加槽
+        self.log_signals.log_message.connect(self.append_log)
+
+        # 配置loguru
+        # self.setup_logger()
         # 为按钮添加点击事件 用于切换界面
         self.widget_button.append(self.ui.GuildButton)
         self.widget_button.append(self.ui.RaidButton)
@@ -76,6 +105,34 @@ class MyWidget(QWidget):
         self.add_detail_box(self.ui.StartToHomeAction_StartAPPcheckBox)
         self.init_combo()
         self.load_from_json(cfg.settings)
+
+    def setup_logger(self):
+        """配置loguru使用自定义处理器"""
+        # 移除默认处理器
+        logger.remove()
+
+        # 添加自定义处理器（使用partial绑定信号对象）
+        logger.add(
+            sink=partial(log_to_textbrowser, signals=self.log_signals),
+            format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | "
+            "<level>{level: <8}</level> | "
+            "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - "
+            "<level>{message}</level>",
+            colorize=True,  # 允许在终端保留颜色
+        )
+
+    def append_log(self, message):
+        """支持HTML格式的彩色日志"""
+        level = "INFO"  # 假设日志级别为INFO
+        color_map = {
+            "ERROR": "red",
+            "WARNING": "orange",
+            "INFO": "green",
+            "DEBUG": "gray",
+            "TRACE": "lightgray",
+        }
+        color = color_map.get(level, "black")
+        self.text_browser.append(f'<span style="color:{color}">{message}</span>')
 
     def add_check_box(self, check_box: QCheckBox):
         check_box.clicked.connect(self.checkBox)

@@ -116,7 +116,7 @@ class Raid(MyCustomAction):
                 clicker.click_rate(0.7, 0.3)
                 clicker.ocr_click(level, roi=[0, 0.41, 1, 0.2])
         else:
-            clicker.ocr_click(level, roi=[0, 0.5, 1, 1])
+            clicker.ocr_click(level, roi=[0.3, 0.5, 1, 1])
         clicker.ocr_click("连续扫荡")
         # 当体力副本无体力时
         detail = clicker.ocr_click("取消")

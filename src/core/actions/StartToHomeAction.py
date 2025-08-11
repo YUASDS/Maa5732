@@ -42,10 +42,16 @@ class StartToHomeAction(MyCustomAction):
             logger.debug(f"Click:今日不再弹出 {status}")
             if not status:
                 break
-            clicker.back()
+            clicker.click_rate(0.01,0.01)
+        # 领取月卡
+        detail = clicker.ocr_click("领取",roi=[0.5, 0.5, 0.9, 0.9])
+        if detail and detail.status.succeeded:
+            clicker.click_blink()
+            clicker.click_blink()
         # 领取月卡
         detail = clicker.ocr_click("贵宾")
         if detail and detail.status.succeeded:
+            clicker.click_blink()
             clicker.click_blink()
         # 情绪检测
         test_detail = clicker.ocr_rate_click("累计奖励", 0.625, 0.55)
