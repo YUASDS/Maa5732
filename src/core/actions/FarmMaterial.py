@@ -25,27 +25,26 @@ from src.utils.model import StopException
 name = __file__.split("\\")[-1].split(".")[0]
 
 # ---------------------------------------------------------------- 导航常量
-# 危机管理入口(与 Raid.py 一致, 已验证)
-CRISIS_MANAGE = (0.74, 0.89)
-# 入口识别文本
-MAIN_STORY = "主线"
-DIST_CITY = "迪斯城"
-# 扫荡流程按钮文本
+# 全部比例坐标来自 docs/nav_probe/(2026-09-12 真机探测)
+CRISIS_MANAGE = (0.74, 0.89)      # 主界面 -> 危机管理
+DIST_CITY = "狄斯城"               # 关卡选择界面底部模式标签(0.481,0.885); 已在该页时再点无害
+CHAPTER_ENTER = (0.80, 0.65)      # 点开章节节点后的详情面板里, 再点标题区进入关卡列表
+DIAL_DRAG_UP = ([0.032, 0.60, 10, 10], [0.032, 0.30, 10, 10], 0.8)     # 旋盘推进
+DIAL_DRAG_DOWN = ([0.032, 0.30, 10, 10], [0.032, 0.60, 10, 10], 0.8)   # 旋盘回退
+STAGE_LIST_SWIPE = ([0.80, 0.59, 10, 10], [0.30, 0.59, 10, 10], 0.8)   # 关卡列表横向滑动
+MAX_DIAL_DRAGS = 6                # 旋盘最多拖动次数
+MAX_LIST_SWIPES = 4               # 关卡列表最多滑动次数
+# 扫荡流程按钮文本(与 Raid.py 的资源关一致)
 SWEEP_ENTRY = "连续扫荡"
 START_SWEEP = "开始扫荡"
 DONE = "完成"
 CANCEL = "取消"
-# 次数设置(先用资源关坐标; 主线若不同, 由探测结果替换)
+# 次数设置: 沿用资源关的弹窗坐标(同一套 UI); 若主线弹窗不同, 真机首跑日志会暴露
 SWEEP_PLUS = (0.7164, 0.6458)
 SWEEP_MINUS = (0.2875, 0.6458)
 SWEEP_COUNT_ROI = [0.25, 0.588, 0.1, 0.04]
-# 旋盘(切换主线位置)与"主线位置 -> 章节"映射: 待探测(docs/nav_probe/coords.md)
-REGION_DIAL = None          # 旋盘中心比例坐标 (x, y)
-REGION_DRAG_UP = None       # 推进: (start, end, duration)
-REGION_DRAG_DOWN = None     # 回退: (start, end, duration)
-REGION_CHAPTERS = {}        # {"N10": "新城", "13": "里湾", ...}
-# 主线导航是否已具备可用常量(Task 1 探测完成后置 True)
-NAV_READY = False
+# 主线导航常量是否可用(探测已完成)
+NAV_READY = True
 
 
 @TASKER_MANAGER.add_action(name)
@@ -166,50 +165,97 @@ class FarmMaterial(MyCustomAction):
         return "13"
 
     def _detect_progress(self, clicker) -> str:
-        """进主线界面 OCR 进度文本(形如 N10-3/9 或 N7), 失败返回空串"""
+        """在迪斯城地图上找「章节节点 + 进度」这一对文本(如 N7 与 1/6), 拼成 N7-1/6"""
         if not NAV_READY:
             return ""
+        self._open_map(clicker)
+        items = self._screen_items(clicker)
+        fractions = [
+            (text.replace(" ", ""), box)
+            for text, _score, box in items
+            if re.match(r"^\d+/\d+$", text.replace(" ", ""))
+        ]
+        for frac_text, frac_box in fractions:
+            best, best_x = None, -1
+            for text, _score, box in items:
+                token = text.replace(" ", "")
+                # 章节节点在进度文本左侧且同一行
+                if (
+                    re.match(r"^N?\d+$", token)
+                    and box[0] < frac_box[0]
+                    and abs(box[1] - frac_box[1]) < 40
+                    and box[0] > best_x
+                ):
+                    best, best_x = token, box[0]
+            if best:
+                logger.info(f"材料刷取: 地图进度 {best}-{frac_text}")
+                return f"{best}-{frac_text}"
+        logger.warning("材料刷取: 未在地图上识别到主线进度")
+        return ""
+
+    # ------------------------------------------------------------ 导航
+    def _screen_items(self, clicker, sleep_time=0.4) -> list:
+        """当前屏幕 OCR 结果 [(text, score, box)]"""
+        return clicker.ocr_roi([0, 0, 1, 1], sleep_time=sleep_time) or []
+
+    def _click_text(self, clicker, text) -> bool:
+        """OCR 点击一段文本; 失败返回 False"""
+        detail = clicker.ocr_click(text)
+        return bool(detail and detail.status.succeeded)
+
+    def _open_map(self, clicker) -> None:
+        """回到迪斯城地图(关卡选择界面的主线条目)"""
         clicker.check_return_home()
         clicker.click_rate(*CRISIS_MANAGE)
-        self._click_retry(clicker, MAIN_STORY)
-        self._click_retry(clicker, DIST_CITY)
-        found = []
-        for text in clicker.ocr(0.4) or {}:
-            cleaned = text.replace(" ", "")
-            if re.match(r"^N?\d+(-\d+/\d+)?$", cleaned):
-                found.append(cleaned)
-        if not found:
-            logger.warning("材料刷取: 未识别到主线进度")
-            return ""
-        return max(found, key=progress_key)
+        clicker.ocr_click(DIST_CITY)
+        stop_sleep(1.0)
 
-    # ------------------------------------------------------------ 执行
-    @staticmethod
-    def _click_retry(clicker, text, times=2):
-        """OCR 点击失败重试(spec 8)"""
-        for _ in range(times):
-            detail = clicker.ocr_click(text)
-            if detail and detail.status.succeeded:
-                return detail
-        return None
+    def _goto_chapter(self, clicker, chapter) -> bool:
+        """在地图上找到目标章节节点并点开; 不可见时按方向拖旋盘(search by drag)"""
+        if self._click_text(clicker, chapter):
+            return True
+        target = int(re.sub(r"\D", "", chapter) or 0)
+        for _ in range(MAX_DIAL_DRAGS):
+            visible = [
+                int(re.sub(r"\D", "", text.replace(" ", "")))
+                for text, _s, _b in self._screen_items(clicker)
+                if re.match(r"^N\d+$", text.replace(" ", ""))
+            ]
+            # 目标比可见的最新章节还新 -> 推进, 否则回退
+            drag = DIAL_DRAG_UP if target > max(visible or [0]) else DIAL_DRAG_DOWN
+            logger.debug(f"材料刷取: 地图上未见 {chapter}, 拖旋盘({drag is DIAL_DRAG_UP and '推进' or '回退'})")
+            clicker.swape(drag[0], drag[1], drag[2])
+            stop_sleep(1.2)
+            if self._click_text(clicker, chapter):
+                return True
+        logger.warning(f"材料刷取: 地图上未能找到章节 {chapter}")
+        return False
+
+    def _select_stage(self, clicker, stage) -> bool:
+        """在章节关卡列表里选中目标关卡(游戏内编号与 wiki 一致, 如 N7-1)"""
+        for _ in range(MAX_LIST_SWIPES + 1):
+            if self._click_text(clicker, stage["code"]):
+                return True
+            clicker.swape(STAGE_LIST_SWIPE[0], STAGE_LIST_SWIPE[1], STAGE_LIST_SWIPE[2])
+            stop_sleep(1.0)
+        logger.warning(f"材料刷取: 关卡列表里未找到 {stage['code']}")
+        return False
 
     def _farm_one(self, clicker, stage) -> str:
         """扫荡单个关卡; 返回 "ok" / "no_stamina" / "unavailable" """
-        clicker.check_return_home()
-        clicker.click_rate(*CRISIS_MANAGE)
-        self._click_retry(clicker, MAIN_STORY)
-        self._click_retry(clicker, DIST_CITY)
-        if not self._switch_region(clicker, stage):
+        self._open_map(clicker)
+        if not self._goto_chapter(clicker, stage["chapter"]):
             clicker.return_home()
             return "unavailable"
-        self._click_retry(clicker, stage["chapter"])       # 章节节点
-        if not self._click_retry(clicker, stage["name"]):  # 关卡
+        clicker.click_rate(*CHAPTER_ENTER)          # 章节详情面板 -> 关卡列表
+        stop_sleep(1.0)
+        if not self._select_stage(clicker, stage):
             clicker.return_home()
             return "unavailable"
-        if not self._click_retry(clicker, SWEEP_ENTRY):
+        if not self._click_text(clicker, SWEEP_ENTRY):
             clicker.return_home()
             return "unavailable"
-        detail = clicker.ocr_click(CANCEL)                 # 体力不足会弹取消
+        detail = clicker.ocr_click(CANCEL)          # 体力不足会弹取消
         if detail and detail.status.succeeded:
             clicker.click_blink()
             clicker.return_home()
@@ -218,43 +264,15 @@ class FarmMaterial(MyCustomAction):
             clicker.back()
             clicker.return_home()
             return "no_stamina"
-        if not self._click_retry(clicker, START_SWEEP):
+        if not self._click_text(clicker, START_SWEEP):
             clicker.back()
             clicker.return_home()
             return "unavailable"
         stop_sleep(12)
-        clicker.click_rate(0.5, 0.1)                       # 升级弹窗
-        self._click_retry(clicker, DONE)
+        clicker.click_rate(0.5, 0.1)                # 升级弹窗
+        self._click_text(clicker, DONE)
         clicker.return_home()
         return "ok"
-
-    def _switch_region(self, clicker, stage) -> bool:
-        """把主线位置切到目标章节所在的位置(旋盘拖拽); 未探测到映射时返回 False"""
-        if not NAV_READY:
-            return False
-        region = REGION_CHAPTERS.get(stage["chapter"])
-        if region is None:
-            logger.warning(f"材料刷取: 未探测到 {stage['chapter']} 所属主线位置")
-            return False
-        # 当前位置由 OCR 判断; 目标在下方则回退, 在上方则推进
-        current = None
-        for text in clicker.ocr(0.4) or {}:
-            if text in REGION_CHAPTERS.values():
-                current = text
-                break
-        if current is None:
-            logger.warning("材料刷取: 无法判断当前主线位置, 切换失败")
-            return False
-        order = list(dict.fromkeys(REGION_CHAPTERS.values()))
-        if current == region:
-            return True
-        if current not in order or region not in order:
-            return False
-        drag = REGION_DRAG_UP if order.index(region) > order.index(current) else REGION_DRAG_DOWN
-        for _ in range(abs(order.index(region) - order.index(current))):
-            clicker.swape(drag[0], drag[1], drag[2])
-            stop_sleep(1)
-        return True
 
     def _set_sweep_count(self, clicker, target: int) -> bool:
         """点加号设次数; 连续两次无法增加判定体力不足, 返回 False"""

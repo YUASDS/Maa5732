@@ -119,9 +119,9 @@ slept.clear()
 from src.utils.material_data import load_material_data, plan, progress_key  # noqa: E402
 
 _entry = plan(load_material_data(), ["裂生冰晶锥"], progress_key("N10"))["裂生冰晶锥"]
-_head, _second = _entry["stage"]["name"], _entry["fallbacks"][0]["name"]
+_head, _second = _entry["stage"]["code"], _entry["fallbacks"][0]["code"]
 fake_retry = FakeClick()
-fake_retry.fail_texts = {"取消", _head}          # 链首关卡点不到
+fake_retry.fail_texts = {"取消", _head}          # 链首关卡编号点不到
 FM.Click = lambda context: fake_retry
 FarmMaterial().run(context=None, argv=arg({
     "裂生冰晶锥checkBox": True, "SweepCountCombo": "3",
