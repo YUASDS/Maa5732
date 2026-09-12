@@ -27,6 +27,11 @@ REWARD_TABS = ("每日", "每周", "密令")
 DIALOG_CHOICES = ("直接领取", "确认", "确定", "领取")
 CLAIM_ALL = "一键领取"
 CLAIM_ONE = "领取"
+# 「一键领取」按钮位置真机探测值。游戏这个按钮是美术字, OCR 经常整块读不到,
+# 所以文本识别失败时按位置兜底 —— 位置不随美术改版变化, 因此不需要模板图片。
+CLAIM_ALL_POS = (0.868, 0.840)
+# 有奖励可领取时界面会出现的提示(兜底点击前的安全检查)
+CLAIMABLE_HINTS = ("当前有奖励可领取", "可领取")
 # 密令页默认停在等级/奖励视图, 需先切到底部的「监察任务」页才有每日/每周/密令标签
 TASK_TAB = "监察任务"
 
@@ -45,6 +50,7 @@ class Supervision(MyCustomAction):
         stop_sleep(1.8)
         for tab in REWARD_TABS:
             self._claim_tab(clicker, tab)
+            self._claim_rows(clicker)     # 一键领取之外的兜底(只点行内精确的「领取」)
         clicker.return_home()
         logger.info("监察密令 结束")
         return True
@@ -114,13 +120,21 @@ class Supervision(MyCustomAction):
         self._claim_all(clicker)
 
     def _claim_all(self, clicker) -> None:
-        """一键领取; 没有该按钮时退化为逐个领取"""
-        if self._click(clicker, CLAIM_ALL, retry=2):
-            stop_sleep(1.8)
-            self._dismiss_dialog(clicker)
-            clicker.click_rate(0.5, 0.5)      # 奖励展示: 点空白关闭
-            stop_sleep(1.0)
-            return
+        """一键领取: 文本优先, OCR 漏读时按位置兜底, 再兜底逐个领取"""
+        if not self._click(clicker, CLAIM_ALL, retry=2):
+            if self._has(clicker, CLAIMABLE_HINTS):
+                logger.info(f"监察密令: OCR 未读到「{CLAIM_ALL}」, 按位置 {CLAIM_ALL_POS} 兜底点击")
+                clicker.click_rate(*CLAIM_ALL_POS)
+            else:
+                logger.info(f"监察密令: 既无「{CLAIM_ALL}」也无待领提示, 跳过本页")
+                return
+        stop_sleep(1.8)
+        self._dismiss_dialog(clicker)
+        clicker.click_rate(0.5, 0.5)      # 奖励展示: 点空白关闭
+        stop_sleep(1.0)
+
+    def _claim_rows(self, clicker) -> None:
+        """兜底: 逐个点行内的「领取」"""
         claimed = 0
         for _ in range(6):
             if not self._click(clicker, CLAIM_ONE, retry=1):
