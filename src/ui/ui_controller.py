@@ -9,7 +9,7 @@ import subprocess
 from functools import partial
 from typing import Union
 from loguru import logger
-from PySide6.QtCore import QObject, Signal, QTimer, QUrl, Qt
+from PySide6.QtCore import QObject, QSize, Signal, QTimer, QUrl, Qt
 from PySide6.QtGui import QDesktopServices, QIcon
 from PySide6.QtWidgets import (
     QApplication,
@@ -43,6 +43,7 @@ from src.utils.click import start_by_exe
 from src.core import version
 from src.core.ThreadManager import TaskerThread
 from src.core.TaskerManager import TASKER_MANAGER, list_adb_devices
+from src.utils.material_data import load_material_data, plan, progress_key
 
 
 class MySignal(QObject):
@@ -120,6 +121,7 @@ class MyWidget(QWidget):
         self.widget_button.append(self.ui.FriendsButton)
         self.widget_button.append(self.ui.PurchaseButton)
         self.widget_button.append(self.ui.SupervisionButton)
+        self.widget_button.append(self.ui.FarmMaterialButton)
 
         for button in self.widget_button:
             button.clicked.connect(self.buttonClick)
@@ -137,6 +139,7 @@ class MyWidget(QWidget):
         self.add_check_box(self.ui.ConstructioncheckBox)
         self.add_check_box(self.ui.BureaucheckBox)
         self.add_check_box(self.ui.GetMailcheckBox)
+        self.add_check_box(self.ui.FarmMaterialcheckBox)
 
         # 对每项任务的详细设置进行注册 格式为 任务名_设置名
         self.add_detail_box(self.ui.Purchase_ActivityShopcheckBox)
@@ -156,8 +159,20 @@ class MyWidget(QWidget):
         self.add_detail_box(self.ui.Supervision_RewardCombo)
         self.add_detail_box(self.ui.StartToHomeAction_ServerCheckcomboBox)
         self.add_detail_box(self.ui.StartToHomeAction_StartAPPcheckBox)
+        # 材料刷取: 12 个材料 + 3 个下拉
+        self.material_data = load_material_data()
+        for mat in self.material_data["materials"]:
+            box = getattr(self.ui, f"FarmMaterial_{mat}checkBox")
+            box.setIcon(QIcon(asset_path("resource", "image", "material", f"{mat}.png")))
+            box.setIconSize(QSize(32, 32))
+            box.clicked.connect(self.refresh_farm_preview)
+            self.add_detail_box(box)
+        self.add_detail_box(self.ui.FarmMaterial_SweepCountCombo)
+        self.add_detail_box(self.ui.FarmMaterial_ProgressModeCombo)
+        self.add_detail_box(self.ui.FarmMaterial_ProgressCombo)
         self.init_combo()
         self.load_from_json(cfg.settings)
+        self.refresh_farm_preview()
         self.init_settings()
 
     def setup_logger(self):
@@ -221,6 +236,49 @@ class MyWidget(QWidget):
         self.ui.Raid_ResourceLevelCombo.addItems(["1", "2", "3", "4", "5"])
         self.ui.Raid_StromLevelCombo.addItems(["1", "2", "3", "4", "5"])
         self.ui.Supervision_RewardCombo.addItems(["体力", "监察徽印"])
+        # 材料刷取
+        self.ui.FarmMaterial_SweepCountCombo.addItems([str(i) for i in range(1, 21)])
+        self.ui.FarmMaterial_ProgressModeCombo.addItems(["自动", "手动"])
+        for chap in self.material_data["chapters"]["主线"]:
+            self.ui.FarmMaterial_ProgressCombo.addItem(str(chap))
+        for chap in self.material_data["chapters"]["主线N"]:
+            self.ui.FarmMaterial_ProgressCombo.addItem(f"N{chap}")
+
+    def selected_materials(self) -> list:
+        """已勾选的材料名(按控件顺序)"""
+        out = []
+        for key, box in self.detail_dict.get("FarmMaterial", {}).items():
+            if isinstance(box, QCheckBox) and box.isChecked():
+                out.append(key[: -len("checkBox")])
+        return out
+
+    def refresh_farm_preview(self):
+        """刷新决策预览: 选了哪些材料、会刷哪一关(spec 6.1)"""
+        label = self.ui.FarmMaterial_PreviewLabel
+        if not hasattr(self, "material_data"):
+            return
+        materials = self.selected_materials()
+        if not materials:
+            label.setText("未选择材料")
+            return
+        mode = self.ui.FarmMaterial_ProgressModeCombo.currentText()
+        if mode == "手动":
+            progress = self.ui.FarmMaterial_ProgressCombo.currentText()
+            source = "手动"
+        else:
+            progress = cfg.main_progress or "13"
+            source = f"上次探测: {cfg.main_progress}" if cfg.main_progress else "上次探测: 未探测(按默认第13章)"
+        plans = plan(self.material_data, materials, progress_key(progress))
+        lines = [f"将刷(进度 {progress or '13'}, {source}):"]
+        for mat in materials:
+            entry = plans.get(mat) or {}
+            stage = entry.get("stage")
+            if stage is None:
+                lines.append(f"  {mat} → 无可用关卡(进度不足), 将跳过")
+                continue
+            stamina = f"体力{stage['stamina']}" if stage.get("stamina") else "体力未知"
+            lines.append(f"  {mat} → {stage['code']} {stage['name']}({stamina})")
+        label.setText("\n".join(lines))
 
     def checkBox(self):
         box = self.sender()
@@ -250,6 +308,8 @@ class MyWidget(QWidget):
             self.ui.stackedWidget.setCurrentWidget(self.ui.Purchase)
         if btnName == "SupervisionButton":
             self.ui.stackedWidget.setCurrentWidget(self.ui.Supervision)
+        if btnName == "FarmMaterialButton":
+            self.ui.stackedWidget.setCurrentWidget(self.ui.RestPage_1)
         if btnName == "SlectAllButton":
             self.ui.stackedWidget.setCurrentWidget(self.ui.Supervision)
         if btnName == "ClearAllButton":

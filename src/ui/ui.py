@@ -8,89 +8,51 @@
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-from PySide6.QtCore import (
-    QCoreApplication,
-    QDate,
-    QDateTime,
-    QLocale,
-    QMetaObject,
-    QObject,
-    QPoint,
-    QRect,
-    QSize,
-    QTime,
-    QUrl,
-    Qt,
-)
-from PySide6.QtGui import (
-    QBrush,
-    QColor,
-    QConicalGradient,
-    QCursor,
-    QFont,
-    QFontDatabase,
-    QGradient,
-    QIcon,
-    QImage,
-    QKeySequence,
-    QLinearGradient,
-    QPainter,
-    QPalette,
-    QPixmap,
-    QRadialGradient,
-    QTransform,
-)
-from PySide6.QtWidgets import (
-    QApplication,
-    QCheckBox,
-    QComboBox,
-    QGroupBox,
-    QHBoxLayout,
-    QLabel,
-    QLineEdit,
-    QPushButton,
-    QSizePolicy,
-    QSpacerItem,
-    QStackedWidget,
-    QTabWidget,
-    QTextBrowser,
-    QVBoxLayout,
-    QWidget,
-)
-
+from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
+    QMetaObject, QObject, QPoint, QRect,
+    QSize, QTime, QUrl, Qt)
+from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
+    QFont, QFontDatabase, QGradient, QIcon,
+    QImage, QKeySequence, QLinearGradient, QPainter,
+    QPalette, QPixmap, QRadialGradient, QTransform)
+from PySide6.QtWidgets import (QApplication, QCheckBox, QComboBox, QGridLayout,
+    QGroupBox, QHBoxLayout, QLabel, QLineEdit,
+    QPushButton, QScrollArea, QSizePolicy, QSpacerItem,
+    QStackedWidget, QTabWidget, QTextBrowser, QVBoxLayout,
+    QWidget)
 
 class Ui_Form(object):
     def setupUi(self, Form):
         if not Form.objectName():
-            Form.setObjectName("Form")
+            Form.setObjectName(u"Form")
         Form.resize(680, 580)
         icon = QIcon()
-        icon.addFile("assets/resource/image/logo.ico", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        icon.addFile(u"logo.ico", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         Form.setWindowIcon(icon)
         self.verticalLayout_3 = QVBoxLayout(Form)
-        self.verticalLayout_3.setObjectName("verticalLayout_3")
+        self.verticalLayout_3.setObjectName(u"verticalLayout_3")
         self.tabWidget = QTabWidget(Form)
-        self.tabWidget.setObjectName("tabWidget")
+        self.tabWidget.setObjectName(u"tabWidget")
         self.working = QWidget()
-        self.working.setObjectName("working")
+        self.working.setObjectName(u"working")
         self.verticalLayout_2 = QVBoxLayout(self.working)
-        self.verticalLayout_2.setObjectName("verticalLayout_2")
+        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
         self.horizontalLayout_8 = QHBoxLayout()
-        self.horizontalLayout_8.setObjectName("horizontalLayout_8")
+        self.horizontalLayout_8.setObjectName(u"horizontalLayout_8")
         self.SelectBox = QGroupBox(self.working)
-        self.SelectBox.setObjectName("SelectBox")
+        self.SelectBox.setObjectName(u"SelectBox")
         self.verticalLayout = QVBoxLayout(self.SelectBox)
-        self.verticalLayout.setObjectName("verticalLayout")
+        self.verticalLayout.setObjectName(u"verticalLayout")
         self.horizontalLayout = QHBoxLayout()
-        self.horizontalLayout.setObjectName("horizontalLayout")
+        self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.StartToHomeActioncheckBox = QCheckBox(self.SelectBox)
-        self.StartToHomeActioncheckBox.setObjectName("StartToHomeActioncheckBox")
+        self.StartToHomeActioncheckBox.setObjectName(u"StartToHomeActioncheckBox")
         self.StartToHomeActioncheckBox.setChecked(True)
 
         self.horizontalLayout.addWidget(self.StartToHomeActioncheckBox)
 
         self.StartButton = QPushButton(self.SelectBox)
-        self.StartButton.setObjectName("StartButton")
+        self.StartButton.setObjectName(u"StartButton")
         icon1 = QIcon(QIcon.fromTheme(QIcon.ThemeIcon.DocumentProperties))
         self.StartButton.setIcon(icon1)
         self.StartButton.setCheckable(False)
@@ -98,163 +60,184 @@ class Ui_Form(object):
 
         self.horizontalLayout.addWidget(self.StartButton)
 
+
         self.verticalLayout.addLayout(self.horizontalLayout)
 
         self.horizontalLayout_3 = QHBoxLayout()
-        self.horizontalLayout_3.setObjectName("horizontalLayout_3")
+        self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
         self.GuildcheckBox = QCheckBox(self.SelectBox)
-        self.GuildcheckBox.setObjectName("GuildcheckBox")
+        self.GuildcheckBox.setObjectName(u"GuildcheckBox")
         self.GuildcheckBox.setChecked(True)
 
         self.horizontalLayout_3.addWidget(self.GuildcheckBox)
 
         self.GuildButton = QPushButton(self.SelectBox)
-        self.GuildButton.setObjectName("GuildButton")
+        self.GuildButton.setObjectName(u"GuildButton")
         self.GuildButton.setIcon(icon1)
 
         self.horizontalLayout_3.addWidget(self.GuildButton)
 
+
         self.verticalLayout.addLayout(self.horizontalLayout_3)
 
         self.horizontalLayout_17 = QHBoxLayout()
-        self.horizontalLayout_17.setObjectName("horizontalLayout_17")
+        self.horizontalLayout_17.setObjectName(u"horizontalLayout_17")
         self.GetMailcheckBox = QCheckBox(self.SelectBox)
-        self.GetMailcheckBox.setObjectName("GetMailcheckBox")
+        self.GetMailcheckBox.setObjectName(u"GetMailcheckBox")
         self.GetMailcheckBox.setChecked(True)
 
         self.horizontalLayout_17.addWidget(self.GetMailcheckBox)
 
+
         self.verticalLayout.addLayout(self.horizontalLayout_17)
 
         self.horizontalLayout_4 = QHBoxLayout()
-        self.horizontalLayout_4.setObjectName("horizontalLayout_4")
+        self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
         self.PurchasecheckBox = QCheckBox(self.SelectBox)
-        self.PurchasecheckBox.setObjectName("PurchasecheckBox")
+        self.PurchasecheckBox.setObjectName(u"PurchasecheckBox")
         self.PurchasecheckBox.setChecked(True)
 
         self.horizontalLayout_4.addWidget(self.PurchasecheckBox)
 
         self.PurchaseButton = QPushButton(self.SelectBox)
-        self.PurchaseButton.setObjectName("PurchaseButton")
+        self.PurchaseButton.setObjectName(u"PurchaseButton")
         self.PurchaseButton.setIcon(icon1)
 
         self.horizontalLayout_4.addWidget(self.PurchaseButton)
 
+
         self.verticalLayout.addLayout(self.horizontalLayout_4)
 
         self.horizontalLayout_5 = QHBoxLayout()
-        self.horizontalLayout_5.setObjectName("horizontalLayout_5")
+        self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
         self.ConstructioncheckBox = QCheckBox(self.SelectBox)
-        self.ConstructioncheckBox.setObjectName("ConstructioncheckBox")
+        self.ConstructioncheckBox.setObjectName(u"ConstructioncheckBox")
         self.ConstructioncheckBox.setChecked(True)
 
         self.horizontalLayout_5.addWidget(self.ConstructioncheckBox)
 
+
         self.verticalLayout.addLayout(self.horizontalLayout_5)
 
         self.horizontalLayout_6 = QHBoxLayout()
-        self.horizontalLayout_6.setObjectName("horizontalLayout_6")
+        self.horizontalLayout_6.setObjectName(u"horizontalLayout_6")
         self.BureaucheckBox = QCheckBox(self.SelectBox)
-        self.BureaucheckBox.setObjectName("BureaucheckBox")
+        self.BureaucheckBox.setObjectName(u"BureaucheckBox")
         self.BureaucheckBox.setChecked(True)
 
         self.horizontalLayout_6.addWidget(self.BureaucheckBox)
 
+
         self.verticalLayout.addLayout(self.horizontalLayout_6)
 
         self.horizontalLayout_7 = QHBoxLayout()
-        self.horizontalLayout_7.setObjectName("horizontalLayout_7")
+        self.horizontalLayout_7.setObjectName(u"horizontalLayout_7")
         self.FriendscheckBox = QCheckBox(self.SelectBox)
-        self.FriendscheckBox.setObjectName("FriendscheckBox")
+        self.FriendscheckBox.setObjectName(u"FriendscheckBox")
         self.FriendscheckBox.setChecked(True)
 
         self.horizontalLayout_7.addWidget(self.FriendscheckBox)
 
         self.FriendsButton = QPushButton(self.SelectBox)
-        self.FriendsButton.setObjectName("FriendsButton")
+        self.FriendsButton.setObjectName(u"FriendsButton")
         self.FriendsButton.setIcon(icon1)
 
         self.horizontalLayout_7.addWidget(self.FriendsButton)
 
+
         self.verticalLayout.addLayout(self.horizontalLayout_7)
 
         self.horizontalLayout_9 = QHBoxLayout()
-        self.horizontalLayout_9.setObjectName("horizontalLayout_9")
+        self.horizontalLayout_9.setObjectName(u"horizontalLayout_9")
         self.RaidcheckBox = QCheckBox(self.SelectBox)
-        self.RaidcheckBox.setObjectName("RaidcheckBox")
+        self.RaidcheckBox.setObjectName(u"RaidcheckBox")
         self.RaidcheckBox.setChecked(True)
 
         self.horizontalLayout_9.addWidget(self.RaidcheckBox)
 
         self.RaidButton = QPushButton(self.SelectBox)
-        self.RaidButton.setObjectName("RaidButton")
+        self.RaidButton.setObjectName(u"RaidButton")
         self.RaidButton.setIcon(icon1)
 
         self.horizontalLayout_9.addWidget(self.RaidButton)
 
+
         self.verticalLayout.addLayout(self.horizontalLayout_9)
 
+        self.horizontalLayout_farm = QHBoxLayout()
+        self.horizontalLayout_farm.setObjectName(u"horizontalLayout_farm")
+        self.FarmMaterialcheckBox = QCheckBox(self.SelectBox)
+        self.FarmMaterialcheckBox.setObjectName(u"FarmMaterialcheckBox")
+
+        self.horizontalLayout_farm.addWidget(self.FarmMaterialcheckBox)
+
+        self.FarmMaterialButton = QPushButton(self.SelectBox)
+        self.FarmMaterialButton.setObjectName(u"FarmMaterialButton")
+        self.FarmMaterialButton.setIcon(icon1)
+
+        self.horizontalLayout_farm.addWidget(self.FarmMaterialButton)
+
+
+        self.verticalLayout.addLayout(self.horizontalLayout_farm)
+
         self.horizontalLayout_10 = QHBoxLayout()
-        self.horizontalLayout_10.setObjectName("horizontalLayout_10")
+        self.horizontalLayout_10.setObjectName(u"horizontalLayout_10")
         self.SupervisioncheckBox = QCheckBox(self.SelectBox)
-        self.SupervisioncheckBox.setObjectName("SupervisioncheckBox")
+        self.SupervisioncheckBox.setObjectName(u"SupervisioncheckBox")
         self.SupervisioncheckBox.setChecked(True)
 
         self.horizontalLayout_10.addWidget(self.SupervisioncheckBox)
 
         self.SupervisionButton = QPushButton(self.SelectBox)
-        self.SupervisionButton.setObjectName("SupervisionButton")
+        self.SupervisionButton.setObjectName(u"SupervisionButton")
         self.SupervisionButton.setIcon(icon1)
 
         self.horizontalLayout_10.addWidget(self.SupervisionButton)
 
+
         self.verticalLayout.addLayout(self.horizontalLayout_10)
 
         self.horizontalLayout_12 = QHBoxLayout()
-        self.horizontalLayout_12.setObjectName("horizontalLayout_12")
+        self.horizontalLayout_12.setObjectName(u"horizontalLayout_12")
         self.SlectAllButton = QPushButton(self.SelectBox)
-        self.SlectAllButton.setObjectName("SlectAllButton")
+        self.SlectAllButton.setObjectName(u"SlectAllButton")
 
         self.horizontalLayout_12.addWidget(self.SlectAllButton)
 
         self.ClearAllButton = QPushButton(self.SelectBox)
-        self.ClearAllButton.setObjectName("ClearAllButton")
+        self.ClearAllButton.setObjectName(u"ClearAllButton")
 
         self.horizontalLayout_12.addWidget(self.ClearAllButton)
 
+
         self.verticalLayout.addLayout(self.horizontalLayout_12)
+
 
         self.horizontalLayout_8.addWidget(self.SelectBox)
 
         self.SettingBox = QGroupBox(self.working)
-        self.SettingBox.setObjectName("SettingBox")
+        self.SettingBox.setObjectName(u"SettingBox")
         self.horizontalLayout_14 = QHBoxLayout(self.SettingBox)
-        self.horizontalLayout_14.setObjectName("horizontalLayout_14")
+        self.horizontalLayout_14.setObjectName(u"horizontalLayout_14")
         self.stackedWidget = QStackedWidget(self.SettingBox)
-        self.stackedWidget.setObjectName("stackedWidget")
+        self.stackedWidget.setObjectName(u"stackedWidget")
         self.stackedWidget.setCursor(QCursor(Qt.CursorShape.ArrowCursor))
         self.StartToHomeAction = QWidget()
-        self.StartToHomeAction.setObjectName("StartToHomeAction")
+        self.StartToHomeAction.setObjectName(u"StartToHomeAction")
         self.StartToHomeAction.setEnabled(True)
         self.StartToHomeAction.setCursor(QCursor(Qt.CursorShape.ArrowCursor))
-        self.StartToHomeAction.setContextMenuPolicy(
-            Qt.ContextMenuPolicy.ActionsContextMenu
-        )
+        self.StartToHomeAction.setContextMenuPolicy(Qt.ContextMenuPolicy.ActionsContextMenu)
         self.verticalLayout_12 = QVBoxLayout(self.StartToHomeAction)
-        self.verticalLayout_12.setObjectName("verticalLayout_12")
+        self.verticalLayout_12.setObjectName(u"verticalLayout_12")
         self.StartToHomeAction_StartAPPcheckBox = QCheckBox(self.StartToHomeAction)
-        self.StartToHomeAction_StartAPPcheckBox.setObjectName(
-            "StartToHomeAction_StartAPPcheckBox"
-        )
+        self.StartToHomeAction_StartAPPcheckBox.setObjectName(u"StartToHomeAction_StartAPPcheckBox")
         self.StartToHomeAction_StartAPPcheckBox.setCheckable(True)
         self.StartToHomeAction_StartAPPcheckBox.setChecked(False)
 
         self.verticalLayout_12.addWidget(self.StartToHomeAction_StartAPPcheckBox)
 
         self.StartToHomeAction_ServerCheckcomboBox = QComboBox(self.StartToHomeAction)
-        self.StartToHomeAction_ServerCheckcomboBox.setObjectName(
-            "StartToHomeAction_ServerCheckcomboBox"
-        )
+        self.StartToHomeAction_ServerCheckcomboBox.setObjectName(u"StartToHomeAction_ServerCheckcomboBox")
         self.StartToHomeAction_ServerCheckcomboBox.setEnabled(True)
         self.StartToHomeAction_ServerCheckcomboBox.setEditable(False)
 
@@ -262,64 +245,61 @@ class Ui_Form(object):
 
         self.stackedWidget.addWidget(self.StartToHomeAction)
         self.Guild = QWidget()
-        self.Guild.setObjectName("Guild")
+        self.Guild.setObjectName(u"Guild")
         self.verticalLayout_11 = QVBoxLayout(self.Guild)
-        self.verticalLayout_11.setObjectName("verticalLayout_11")
+        self.verticalLayout_11.setObjectName(u"verticalLayout_11")
         self.Guild_GuildCombo = QComboBox(self.Guild)
-        self.Guild_GuildCombo.setObjectName("Guild_GuildCombo")
+        self.Guild_GuildCombo.setObjectName(u"Guild_GuildCombo")
 
         self.verticalLayout_11.addWidget(self.Guild_GuildCombo)
 
         self.stackedWidget.addWidget(self.Guild)
         self.Purchase = QWidget()
-        self.Purchase.setObjectName("Purchase")
+        self.Purchase.setObjectName(u"Purchase")
         self.verticalLayout_10 = QVBoxLayout(self.Purchase)
-        self.verticalLayout_10.setObjectName("verticalLayout_10")
+        self.verticalLayout_10.setObjectName(u"verticalLayout_10")
         self.verticalLayout_6 = QVBoxLayout()
-        self.verticalLayout_6.setObjectName("verticalLayout_6")
+        self.verticalLayout_6.setObjectName(u"verticalLayout_6")
         self.Purchase_FriendShopcheckBox = QCheckBox(self.Purchase)
-        self.Purchase_FriendShopcheckBox.setObjectName("Purchase_FriendShopcheckBox")
+        self.Purchase_FriendShopcheckBox.setObjectName(u"Purchase_FriendShopcheckBox")
         self.Purchase_FriendShopcheckBox.setChecked(True)
 
         self.verticalLayout_6.addWidget(self.Purchase_FriendShopcheckBox)
 
         self.Purchase_ActivityShopcheckBox = QCheckBox(self.Purchase)
-        self.Purchase_ActivityShopcheckBox.setObjectName(
-            "Purchase_ActivityShopcheckBox"
-        )
+        self.Purchase_ActivityShopcheckBox.setObjectName(u"Purchase_ActivityShopcheckBox")
         self.Purchase_ActivityShopcheckBox.setChecked(True)
 
         self.verticalLayout_6.addWidget(self.Purchase_ActivityShopcheckBox)
 
         self.Purchase_FreeShopcheckBox = QCheckBox(self.Purchase)
-        self.Purchase_FreeShopcheckBox.setObjectName("Purchase_FreeShopcheckBox")
+        self.Purchase_FreeShopcheckBox.setObjectName(u"Purchase_FreeShopcheckBox")
         self.Purchase_FreeShopcheckBox.setChecked(True)
 
         self.verticalLayout_6.addWidget(self.Purchase_FreeShopcheckBox)
+
 
         self.verticalLayout_10.addLayout(self.verticalLayout_6)
 
         self.stackedWidget.addWidget(self.Purchase)
         self.Friends = QWidget()
-        self.Friends.setObjectName("Friends")
+        self.Friends.setObjectName(u"Friends")
         self.verticalLayout_5 = QVBoxLayout(self.Friends)
-        self.verticalLayout_5.setObjectName("verticalLayout_5")
+        self.verticalLayout_5.setObjectName(u"verticalLayout_5")
         self.verticalLayout_4 = QVBoxLayout()
-        self.verticalLayout_4.setObjectName("verticalLayout_4")
+        self.verticalLayout_4.setObjectName(u"verticalLayout_4")
         self.Friends_FriendPointcheckBox = QCheckBox(self.Friends)
-        self.Friends_FriendPointcheckBox.setObjectName("Friends_FriendPointcheckBox")
+        self.Friends_FriendPointcheckBox.setObjectName(u"Friends_FriendPointcheckBox")
         self.Friends_FriendPointcheckBox.setChecked(True)
 
         self.verticalLayout_4.addWidget(self.Friends_FriendPointcheckBox)
 
         self.Friends_AutoLikecheckBox = QCheckBox(self.Friends)
-        self.Friends_AutoLikecheckBox.setObjectName("Friends_AutoLikecheckBox")
+        self.Friends_AutoLikecheckBox.setObjectName(u"Friends_AutoLikecheckBox")
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(
-            self.Friends_AutoLikecheckBox.sizePolicy().hasHeightForWidth()
-        )
+        sizePolicy.setHeightForWidth(self.Friends_AutoLikecheckBox.sizePolicy().hasHeightForWidth())
         self.Friends_AutoLikecheckBox.setSizePolicy(sizePolicy)
         self.Friends_AutoLikecheckBox.setChecked(True)
 
@@ -331,80 +311,196 @@ class Ui_Form(object):
 
         self.stackedWidget.addWidget(self.Friends)
         self.Raid = QWidget()
-        self.Raid.setObjectName("Raid")
+        self.Raid.setObjectName(u"Raid")
         self.verticalLayout_9 = QVBoxLayout(self.Raid)
-        self.verticalLayout_9.setObjectName("verticalLayout_9")
+        self.verticalLayout_9.setObjectName(u"verticalLayout_9")
         self.verticalLayout_7 = QVBoxLayout()
-        self.verticalLayout_7.setObjectName("verticalLayout_7")
+        self.verticalLayout_7.setObjectName(u"verticalLayout_7")
         self.Raid_ActivityRaidcheckBox = QCheckBox(self.Raid)
-        self.Raid_ActivityRaidcheckBox.setObjectName("Raid_ActivityRaidcheckBox")
+        self.Raid_ActivityRaidcheckBox.setObjectName(u"Raid_ActivityRaidcheckBox")
 
         self.verticalLayout_7.addWidget(self.Raid_ActivityRaidcheckBox)
 
         self.Raid_RaidDarkcheckBox = QCheckBox(self.Raid)
-        self.Raid_RaidDarkcheckBox.setObjectName("Raid_RaidDarkcheckBox")
+        self.Raid_RaidDarkcheckBox.setObjectName(u"Raid_RaidDarkcheckBox")
         self.Raid_RaidDarkcheckBox.setChecked(True)
 
         self.verticalLayout_7.addWidget(self.Raid_RaidDarkcheckBox)
 
         self.Raid_RaidRivercheckBox = QCheckBox(self.Raid)
-        self.Raid_RaidRivercheckBox.setObjectName("Raid_RaidRivercheckBox")
+        self.Raid_RaidRivercheckBox.setObjectName(u"Raid_RaidRivercheckBox")
         self.Raid_RaidRivercheckBox.setChecked(True)
 
         self.verticalLayout_7.addWidget(self.Raid_RaidRivercheckBox)
 
         self.Raid_StromLevelCombo = QComboBox(self.Raid)
-        self.Raid_StromLevelCombo.setObjectName("Raid_StromLevelCombo")
+        self.Raid_StromLevelCombo.setObjectName(u"Raid_StromLevelCombo")
 
         self.verticalLayout_7.addWidget(self.Raid_StromLevelCombo)
 
         self.Raid_RaidFightcheckBox = QCheckBox(self.Raid)
-        self.Raid_RaidFightcheckBox.setObjectName("Raid_RaidFightcheckBox")
+        self.Raid_RaidFightcheckBox.setObjectName(u"Raid_RaidFightcheckBox")
 
         self.verticalLayout_7.addWidget(self.Raid_RaidFightcheckBox)
 
         self.Raid_ResourceCombo = QComboBox(self.Raid)
-        self.Raid_ResourceCombo.setObjectName("Raid_ResourceCombo")
+        self.Raid_ResourceCombo.setObjectName(u"Raid_ResourceCombo")
 
         self.verticalLayout_7.addWidget(self.Raid_ResourceCombo)
 
         self.Raid_ResourceLevelCombo = QComboBox(self.Raid)
-        self.Raid_ResourceLevelCombo.setObjectName("Raid_ResourceLevelCombo")
+        self.Raid_ResourceLevelCombo.setObjectName(u"Raid_ResourceLevelCombo")
 
         self.verticalLayout_7.addWidget(self.Raid_ResourceLevelCombo)
+
 
         self.verticalLayout_9.addLayout(self.verticalLayout_7)
 
         self.stackedWidget.addWidget(self.Raid)
         self.Supervision = QWidget()
-        self.Supervision.setObjectName("Supervision")
+        self.Supervision.setObjectName(u"Supervision")
         self.verticalLayout_8 = QVBoxLayout(self.Supervision)
-        self.verticalLayout_8.setObjectName("verticalLayout_8")
+        self.verticalLayout_8.setObjectName(u"verticalLayout_8")
         self.Supervision_RewardCombo = QComboBox(self.Supervision)
-        self.Supervision_RewardCombo.setObjectName("Supervision_RewardCombo")
+        self.Supervision_RewardCombo.setObjectName(u"Supervision_RewardCombo")
 
         self.verticalLayout_8.addWidget(self.Supervision_RewardCombo)
 
         self.stackedWidget.addWidget(self.Supervision)
         self.RestPage_2 = QWidget()
-        self.RestPage_2.setObjectName("RestPage_2")
+        self.RestPage_2.setObjectName(u"RestPage_2")
         self.stackedWidget.addWidget(self.RestPage_2)
         self.RestPage_1 = QWidget()
-        self.RestPage_1.setObjectName("RestPage_1")
+        self.RestPage_1.setObjectName(u"RestPage_1")
+        self.verticalLayout_farm = QVBoxLayout(self.RestPage_1)
+        self.verticalLayout_farm.setObjectName(u"verticalLayout_farm")
+        self.horizontalLayout_farm_top = QHBoxLayout()
+        self.horizontalLayout_farm_top.setObjectName(u"horizontalLayout_farm_top")
+        self.FarmMaterial_ProgressLabel = QLabel(self.RestPage_1)
+        self.FarmMaterial_ProgressLabel.setObjectName(u"FarmMaterial_ProgressLabel")
+
+        self.horizontalLayout_farm_top.addWidget(self.FarmMaterial_ProgressLabel)
+
+        self.FarmMaterial_ProgressModeCombo = QComboBox(self.RestPage_1)
+        self.FarmMaterial_ProgressModeCombo.setObjectName(u"FarmMaterial_ProgressModeCombo")
+
+        self.horizontalLayout_farm_top.addWidget(self.FarmMaterial_ProgressModeCombo)
+
+        self.FarmMaterial_ProgressCombo = QComboBox(self.RestPage_1)
+        self.FarmMaterial_ProgressCombo.setObjectName(u"FarmMaterial_ProgressCombo")
+
+        self.horizontalLayout_farm_top.addWidget(self.FarmMaterial_ProgressCombo)
+
+        self.FarmMaterial_SweepCountLabel = QLabel(self.RestPage_1)
+        self.FarmMaterial_SweepCountLabel.setObjectName(u"FarmMaterial_SweepCountLabel")
+
+        self.horizontalLayout_farm_top.addWidget(self.FarmMaterial_SweepCountLabel)
+
+        self.FarmMaterial_SweepCountCombo = QComboBox(self.RestPage_1)
+        self.FarmMaterial_SweepCountCombo.setObjectName(u"FarmMaterial_SweepCountCombo")
+
+        self.horizontalLayout_farm_top.addWidget(self.FarmMaterial_SweepCountCombo)
+
+        self.horizontalSpacer_farm = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_farm_top.addItem(self.horizontalSpacer_farm)
+
+
+        self.verticalLayout_farm.addLayout(self.horizontalLayout_farm_top)
+
+        self.FarmMaterial_ScrollArea = QScrollArea(self.RestPage_1)
+        self.FarmMaterial_ScrollArea.setObjectName(u"FarmMaterial_ScrollArea")
+        self.FarmMaterial_ScrollArea.setWidgetResizable(True)
+        self.FarmMaterial_ScrollContents = QWidget()
+        self.FarmMaterial_ScrollContents.setObjectName(u"FarmMaterial_ScrollContents")
+        self.FarmMaterial_Grid = QGridLayout(self.FarmMaterial_ScrollContents)
+        self.FarmMaterial_Grid.setObjectName(u"FarmMaterial_Grid")
+        self.FarmMaterial_裂生冰晶锥checkBox = QCheckBox(self.FarmMaterial_ScrollContents)
+        self.FarmMaterial_裂生冰晶锥checkBox.setObjectName(u"FarmMaterial_\u88c2\u751f\u51b0\u6676\u9525checkBox")
+
+        self.FarmMaterial_Grid.addWidget(self.FarmMaterial_裂生冰晶锥checkBox, 0, 0, 1, 1)
+
+        self.FarmMaterial_异化尖刺骨片checkBox = QCheckBox(self.FarmMaterial_ScrollContents)
+        self.FarmMaterial_异化尖刺骨片checkBox.setObjectName(u"FarmMaterial_\u5f02\u5316\u5c16\u523a\u9aa8\u7247checkBox")
+
+        self.FarmMaterial_Grid.addWidget(self.FarmMaterial_异化尖刺骨片checkBox, 0, 1, 1, 1)
+
+        self.FarmMaterial_结霜毒砂晶checkBox = QCheckBox(self.FarmMaterial_ScrollContents)
+        self.FarmMaterial_结霜毒砂晶checkBox.setObjectName(u"FarmMaterial_\u7ed3\u971c\u6bd2\u7802\u6676checkBox")
+
+        self.FarmMaterial_Grid.addWidget(self.FarmMaterial_结霜毒砂晶checkBox, 0, 2, 1, 1)
+
+        self.FarmMaterial_衰变暮辉晶checkBox = QCheckBox(self.FarmMaterial_ScrollContents)
+        self.FarmMaterial_衰变暮辉晶checkBox.setObjectName(u"FarmMaterial_\u8870\u53d8\u66ae\u8f89\u6676checkBox")
+
+        self.FarmMaterial_Grid.addWidget(self.FarmMaterial_衰变暮辉晶checkBox, 1, 0, 1, 1)
+
+        self.FarmMaterial_异化真红囊胞checkBox = QCheckBox(self.FarmMaterial_ScrollContents)
+        self.FarmMaterial_异化真红囊胞checkBox.setObjectName(u"FarmMaterial_\u5f02\u5316\u771f\u7ea2\u56ca\u80decheckBox")
+
+        self.FarmMaterial_Grid.addWidget(self.FarmMaterial_异化真红囊胞checkBox, 1, 1, 1, 1)
+
+        self.FarmMaterial_沉雾泪晶checkBox = QCheckBox(self.FarmMaterial_ScrollContents)
+        self.FarmMaterial_沉雾泪晶checkBox.setObjectName(u"FarmMaterial_\u6c89\u96fe\u6cea\u6676checkBox")
+
+        self.FarmMaterial_Grid.addWidget(self.FarmMaterial_沉雾泪晶checkBox, 1, 2, 1, 1)
+
+        self.FarmMaterial_异化棘状角checkBox = QCheckBox(self.FarmMaterial_ScrollContents)
+        self.FarmMaterial_异化棘状角checkBox.setObjectName(u"FarmMaterial_\u5f02\u5316\u68d8\u72b6\u89d2checkBox")
+
+        self.FarmMaterial_Grid.addWidget(self.FarmMaterial_异化棘状角checkBox, 2, 0, 1, 1)
+
+        self.FarmMaterial_异化暗凝胶checkBox = QCheckBox(self.FarmMaterial_ScrollContents)
+        self.FarmMaterial_异化暗凝胶checkBox.setObjectName(u"FarmMaterial_\u5f02\u5316\u6697\u51dd\u80f6checkBox")
+
+        self.FarmMaterial_Grid.addWidget(self.FarmMaterial_异化暗凝胶checkBox, 2, 1, 1, 1)
+
+        self.FarmMaterial_繁盛曲铜晶checkBox = QCheckBox(self.FarmMaterial_ScrollContents)
+        self.FarmMaterial_繁盛曲铜晶checkBox.setObjectName(u"FarmMaterial_\u7e41\u76db\u66f2\u94dc\u6676checkBox")
+
+        self.FarmMaterial_Grid.addWidget(self.FarmMaterial_繁盛曲铜晶checkBox, 2, 2, 1, 1)
+
+        self.FarmMaterial_异化拟怪腕足checkBox = QCheckBox(self.FarmMaterial_ScrollContents)
+        self.FarmMaterial_异化拟怪腕足checkBox.setObjectName(u"FarmMaterial_\u5f02\u5316\u62df\u602a\u8155\u8db3checkBox")
+
+        self.FarmMaterial_Grid.addWidget(self.FarmMaterial_异化拟怪腕足checkBox, 3, 0, 1, 1)
+
+        self.FarmMaterial_异化诡影鞘翅checkBox = QCheckBox(self.FarmMaterial_ScrollContents)
+        self.FarmMaterial_异化诡影鞘翅checkBox.setObjectName(u"FarmMaterial_\u5f02\u5316\u8be1\u5f71\u9798\u7fc5checkBox")
+
+        self.FarmMaterial_Grid.addWidget(self.FarmMaterial_异化诡影鞘翅checkBox, 3, 1, 1, 1)
+
+        self.FarmMaterial_燃念赤晶checkBox = QCheckBox(self.FarmMaterial_ScrollContents)
+        self.FarmMaterial_燃念赤晶checkBox.setObjectName(u"FarmMaterial_\u71c3\u5ff5\u8d64\u6676checkBox")
+
+        self.FarmMaterial_Grid.addWidget(self.FarmMaterial_燃念赤晶checkBox, 3, 2, 1, 1)
+
+        self.FarmMaterial_ScrollArea.setWidget(self.FarmMaterial_ScrollContents)
+
+        self.verticalLayout_farm.addWidget(self.FarmMaterial_ScrollArea)
+
+        self.FarmMaterial_PreviewLabel = QLabel(self.RestPage_1)
+        self.FarmMaterial_PreviewLabel.setObjectName(u"FarmMaterial_PreviewLabel")
+        self.FarmMaterial_PreviewLabel.setWordWrap(True)
+
+        self.verticalLayout_farm.addWidget(self.FarmMaterial_PreviewLabel)
+
         self.stackedWidget.addWidget(self.RestPage_1)
 
         self.horizontalLayout_14.addWidget(self.stackedWidget)
 
+
         self.horizontalLayout_8.addWidget(self.SettingBox)
 
         self.LogBox = QGroupBox(self.working)
-        self.LogBox.setObjectName("LogBox")
+        self.LogBox.setObjectName(u"LogBox")
         self.horizontalLayout_11 = QHBoxLayout(self.LogBox)
-        self.horizontalLayout_11.setObjectName("horizontalLayout_11")
+        self.horizontalLayout_11.setObjectName(u"horizontalLayout_11")
         self.textBrowser = QTextBrowser(self.LogBox)
-        self.textBrowser.setObjectName("textBrowser")
+        self.textBrowser.setObjectName(u"textBrowser")
 
         self.horizontalLayout_11.addWidget(self.textBrowser)
+
 
         self.horizontalLayout_8.addWidget(self.LogBox)
 
@@ -415,132 +511,135 @@ class Ui_Form(object):
         self.verticalLayout_2.addLayout(self.horizontalLayout_8)
 
         self.horizontalLayout_15 = QHBoxLayout()
-        self.horizontalLayout_15.setObjectName("horizontalLayout_15")
+        self.horizontalLayout_15.setObjectName(u"horizontalLayout_15")
         self.DeviceLabel = QLabel(self.working)
-        self.DeviceLabel.setObjectName("DeviceLabel")
+        self.DeviceLabel.setObjectName(u"DeviceLabel")
 
         self.horizontalLayout_15.addWidget(self.DeviceLabel)
 
         self.DeviceCombo = QComboBox(self.working)
-        self.DeviceCombo.setObjectName("DeviceCombo")
+        self.DeviceCombo.setObjectName(u"DeviceCombo")
         self.DeviceCombo.setMinimumSize(QSize(220, 0))
 
         self.horizontalLayout_15.addWidget(self.DeviceCombo)
 
         self.DeviceRefreshButton = QPushButton(self.working)
-        self.DeviceRefreshButton.setObjectName("DeviceRefreshButton")
+        self.DeviceRefreshButton.setObjectName(u"DeviceRefreshButton")
 
         self.horizontalLayout_15.addWidget(self.DeviceRefreshButton)
 
-        self.horizontalSpacer = QSpacerItem(
-            40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum
-        )
+        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
         self.horizontalLayout_15.addItem(self.horizontalSpacer)
 
         self.TaskStatusLabel = QLabel(self.working)
-        self.TaskStatusLabel.setObjectName("TaskStatusLabel")
+        self.TaskStatusLabel.setObjectName(u"TaskStatusLabel")
 
         self.horizontalLayout_15.addWidget(self.TaskStatusLabel)
 
         self.LinkStartButton = QPushButton(self.working)
-        self.LinkStartButton.setObjectName("LinkStartButton")
+        self.LinkStartButton.setObjectName(u"LinkStartButton")
         sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         sizePolicy1.setHorizontalStretch(0)
         sizePolicy1.setVerticalStretch(0)
-        sizePolicy1.setHeightForWidth(
-            self.LinkStartButton.sizePolicy().hasHeightForWidth()
-        )
+        sizePolicy1.setHeightForWidth(self.LinkStartButton.sizePolicy().hasHeightForWidth())
         self.LinkStartButton.setSizePolicy(sizePolicy1)
 
         self.horizontalLayout_15.addWidget(self.LinkStartButton)
+
 
         self.verticalLayout_2.addLayout(self.horizontalLayout_15)
 
         self.tabWidget.addTab(self.working, "")
         self.settings = QWidget()
-        self.settings.setObjectName("settings")
+        self.settings.setObjectName(u"settings")
         self.settings.setMouseTracking(False)
         self.verticalLayout_13 = QVBoxLayout(self.settings)
-        self.verticalLayout_13.setObjectName("verticalLayout_13")
+        self.verticalLayout_13.setObjectName(u"verticalLayout_13")
         self.UpdateBox = QGroupBox(self.settings)
-        self.UpdateBox.setObjectName("UpdateBox")
+        self.UpdateBox.setObjectName(u"UpdateBox")
         self.horizontalLayout_16 = QHBoxLayout(self.UpdateBox)
-        self.horizontalLayout_16.setObjectName("horizontalLayout_16")
+        self.horizontalLayout_16.setObjectName(u"horizontalLayout_16")
         self.CheckUpdatecheckBox = QCheckBox(self.UpdateBox)
-        self.CheckUpdatecheckBox.setObjectName("CheckUpdatecheckBox")
+        self.CheckUpdatecheckBox.setObjectName(u"CheckUpdatecheckBox")
         self.CheckUpdatecheckBox.setChecked(True)
 
         self.horizontalLayout_16.addWidget(self.CheckUpdatecheckBox)
 
         self.CheckUpdateButton = QPushButton(self.UpdateBox)
-        self.CheckUpdateButton.setObjectName("CheckUpdateButton")
+        self.CheckUpdateButton.setObjectName(u"CheckUpdateButton")
 
         self.horizontalLayout_16.addWidget(self.CheckUpdateButton)
+
 
         self.verticalLayout_13.addWidget(self.UpdateBox)
 
         self.GameBox = QGroupBox(self.settings)
-        self.GameBox.setObjectName("GameBox")
+        self.GameBox.setObjectName(u"GameBox")
         self.verticalLayout_14 = QVBoxLayout(self.GameBox)
-        self.verticalLayout_14.setObjectName("verticalLayout_14")
+        self.verticalLayout_14.setObjectName(u"verticalLayout_14")
         self.horizontalLayout_18 = QHBoxLayout()
-        self.horizontalLayout_18.setObjectName("horizontalLayout_18")
+        self.horizontalLayout_18.setObjectName(u"horizontalLayout_18")
         self.GamePathLabel = QLabel(self.GameBox)
-        self.GamePathLabel.setObjectName("GamePathLabel")
+        self.GamePathLabel.setObjectName(u"GamePathLabel")
 
         self.horizontalLayout_18.addWidget(self.GamePathLabel)
 
         self.GamePathEdit = QLineEdit(self.GameBox)
-        self.GamePathEdit.setObjectName("GamePathEdit")
+        self.GamePathEdit.setObjectName(u"GamePathEdit")
 
         self.horizontalLayout_18.addWidget(self.GamePathEdit)
 
         self.BrowseButton = QPushButton(self.GameBox)
-        self.BrowseButton.setObjectName("BrowseButton")
+        self.BrowseButton.setObjectName(u"BrowseButton")
 
         self.horizontalLayout_18.addWidget(self.BrowseButton)
+
 
         self.verticalLayout_14.addLayout(self.horizontalLayout_18)
 
         self.horizontalLayout_19 = QHBoxLayout()
-        self.horizontalLayout_19.setObjectName("horizontalLayout_19")
+        self.horizontalLayout_19.setObjectName(u"horizontalLayout_19")
         self.GameArgsLabel = QLabel(self.GameBox)
-        self.GameArgsLabel.setObjectName("GameArgsLabel")
+        self.GameArgsLabel.setObjectName(u"GameArgsLabel")
 
         self.horizontalLayout_19.addWidget(self.GameArgsLabel)
 
         self.GameArgsEdit = QLineEdit(self.GameBox)
-        self.GameArgsEdit.setObjectName("GameArgsEdit")
+        self.GameArgsEdit.setObjectName(u"GameArgsEdit")
 
         self.horizontalLayout_19.addWidget(self.GameArgsEdit)
 
+
         self.verticalLayout_14.addLayout(self.horizontalLayout_19)
+
 
         self.verticalLayout_13.addWidget(self.GameBox)
 
         self.RunBox = QGroupBox(self.settings)
-        self.RunBox.setObjectName("RunBox")
+        self.RunBox.setObjectName(u"RunBox")
         self.verticalLayout_15 = QVBoxLayout(self.RunBox)
-        self.verticalLayout_15.setObjectName("verticalLayout_15")
+        self.verticalLayout_15.setObjectName(u"verticalLayout_15")
         self.AutoRuncheckBox = QCheckBox(self.RunBox)
-        self.AutoRuncheckBox.setObjectName("AutoRuncheckBox")
+        self.AutoRuncheckBox.setObjectName(u"AutoRuncheckBox")
 
         self.verticalLayout_15.addWidget(self.AutoRuncheckBox)
 
         self.horizontalLayout_20 = QHBoxLayout()
-        self.horizontalLayout_20.setObjectName("horizontalLayout_20")
+        self.horizontalLayout_20.setObjectName(u"horizontalLayout_20")
         self.AfterFinishLabel = QLabel(self.RunBox)
-        self.AfterFinishLabel.setObjectName("AfterFinishLabel")
+        self.AfterFinishLabel.setObjectName(u"AfterFinishLabel")
 
         self.horizontalLayout_20.addWidget(self.AfterFinishLabel)
 
         self.AfterFinishCombo = QComboBox(self.RunBox)
-        self.AfterFinishCombo.setObjectName("AfterFinishCombo")
+        self.AfterFinishCombo.setObjectName(u"AfterFinishCombo")
 
         self.horizontalLayout_20.addWidget(self.AfterFinishCombo)
 
+
         self.verticalLayout_15.addLayout(self.horizontalLayout_20)
+
 
         self.verticalLayout_13.addWidget(self.RunBox)
 
@@ -548,153 +647,85 @@ class Ui_Form(object):
 
         self.verticalLayout_3.addWidget(self.tabWidget)
 
+
         self.retranslateUi(Form)
 
         self.tabWidget.setCurrentIndex(0)
         self.stackedWidget.setCurrentIndex(4)
 
-        QMetaObject.connectSlotsByName(Form)
 
+        QMetaObject.connectSlotsByName(Form)
     # setupUi
 
     def retranslateUi(self, Form):
-        Form.setWindowTitle(QCoreApplication.translate("Form", "Maa5732", None))
+        Form.setWindowTitle(QCoreApplication.translate("Form", u"Maa5732", None))
         self.SelectBox.setTitle("")
-        self.StartToHomeActioncheckBox.setText(
-            QCoreApplication.translate("Form", "\u542f\u52a8", None)
-        )
+        self.StartToHomeActioncheckBox.setText(QCoreApplication.translate("Form", u"\u542f\u52a8", None))
         self.StartButton.setText("")
-        self.GuildcheckBox.setText(
-            QCoreApplication.translate("Form", "\u5de5\u4f1a\u6350\u8d60", None)
-        )
+        self.GuildcheckBox.setText(QCoreApplication.translate("Form", u"\u5de5\u4f1a\u6350\u8d60", None))
         self.GuildButton.setText("")
-        self.GetMailcheckBox.setText(
-            QCoreApplication.translate("Form", "\u90ae\u4ef6\u9886\u53d6", None)
-        )
-        self.PurchasecheckBox.setText(
-            QCoreApplication.translate("Form", "\u91c7\u8d2d\u4e2d\u5fc3", None)
-        )
+        self.GetMailcheckBox.setText(QCoreApplication.translate("Form", u"\u90ae\u4ef6\u9886\u53d6", None))
+        self.PurchasecheckBox.setText(QCoreApplication.translate("Form", u"\u91c7\u8d2d\u4e2d\u5fc3", None))
         self.PurchaseButton.setText("")
-        self.ConstructioncheckBox.setText(
-            QCoreApplication.translate("Form", "\u57fa\u5efa\u6536\u83dc", None)
-        )
-        self.BureaucheckBox.setText(
-            QCoreApplication.translate("Form", "\u7ba1\u7406\u5c40", None)
-        )
-        self.FriendscheckBox.setText(
-            QCoreApplication.translate("Form", "\u597d\u53cb", None)
-        )
+        self.ConstructioncheckBox.setText(QCoreApplication.translate("Form", u"\u57fa\u5efa\u6536\u83dc", None))
+        self.BureaucheckBox.setText(QCoreApplication.translate("Form", u"\u7ba1\u7406\u5c40", None))
+        self.FriendscheckBox.setText(QCoreApplication.translate("Form", u"\u597d\u53cb", None))
         self.FriendsButton.setText("")
-        self.RaidcheckBox.setText(
-            QCoreApplication.translate("Form", "\u526f\u672c", None)
-        )
+        self.RaidcheckBox.setText(QCoreApplication.translate("Form", u"\u526f\u672c", None))
         self.RaidButton.setText("")
-        self.SupervisioncheckBox.setText(
-            QCoreApplication.translate("Form", "\u76d1\u5bdf\u5bc6\u4ee4", None)
-        )
+        self.FarmMaterialcheckBox.setText(QCoreApplication.translate("Form", u"\u5237\u6750\u6599", None))
+        self.FarmMaterialButton.setText("")
+        self.SupervisioncheckBox.setText(QCoreApplication.translate("Form", u"\u76d1\u5bdf\u5bc6\u4ee4", None))
         self.SupervisionButton.setText("")
-        self.SlectAllButton.setText(
-            QCoreApplication.translate("Form", "\u5168\u9009", None)
-        )
-        self.ClearAllButton.setText(
-            QCoreApplication.translate("Form", "\u6e05\u7a7a", None)
-        )
+        self.SlectAllButton.setText(QCoreApplication.translate("Form", u"\u5168\u9009", None))
+        self.ClearAllButton.setText(QCoreApplication.translate("Form", u"\u6e05\u7a7a", None))
         self.SettingBox.setTitle("")
-        self.StartToHomeAction_StartAPPcheckBox.setText(
-            QCoreApplication.translate("Form", "\u542f\u52a8\u6e38\u620f", None)
-        )
-        self.Purchase_FriendShopcheckBox.setText(
-            QCoreApplication.translate("Form", "\u53cb\u60c5\u70b9\u5546\u5e97", None)
-        )
-        self.Purchase_ActivityShopcheckBox.setText(
-            QCoreApplication.translate("Form", "\u6d3b\u52a8\u5546\u5e97", None)
-        )
-        self.Purchase_FreeShopcheckBox.setText(
-            QCoreApplication.translate("Form", "\u514d\u8d39\u4f53\u529b", None)
-        )
-        self.Friends_FriendPointcheckBox.setText(
-            QCoreApplication.translate(
-                "Form", "\u6536\u53d6\u8d60\u9001\u53cb\u60c5\u70b9", None
-            )
-        )
-        self.Friends_AutoLikecheckBox.setText(
-            QCoreApplication.translate("Form", "\u81ea\u52a8\u70b9\u8d5e", None)
-        )
-        self.Raid_RaidDarkcheckBox.setText(
-            QCoreApplication.translate("Form", "\u6df1\u4e95", None)
-        )
-        self.Raid_ActivityRaidcheckBox.setText(
-            QCoreApplication.translate("Form", "\u6d3b\u52a8\u626b\u8361", None)
-        )
-        self.Raid_RaidRivercheckBox.setText(
-            QCoreApplication.translate("Form", "\u8bb0\u5fc6\u98ce\u66b4", None)
-        )
-        self.Raid_RaidFightcheckBox.setText(
-            QCoreApplication.translate("Form", "\u4f53\u529b\u526f\u672c", None)
-        )
+        self.StartToHomeAction_StartAPPcheckBox.setText(QCoreApplication.translate("Form", u"\u542f\u52a8\u6e38\u620f", None))
+        self.Purchase_FriendShopcheckBox.setText(QCoreApplication.translate("Form", u"\u53cb\u60c5\u70b9\u5546\u5e97", None))
+        self.Purchase_ActivityShopcheckBox.setText(QCoreApplication.translate("Form", u"\u6d3b\u52a8\u5546\u5e97", None))
+        self.Purchase_FreeShopcheckBox.setText(QCoreApplication.translate("Form", u"\u514d\u8d39\u4f53\u529b", None))
+        self.Friends_FriendPointcheckBox.setText(QCoreApplication.translate("Form", u"\u6536\u53d6\u8d60\u9001\u53cb\u60c5\u70b9", None))
+        self.Friends_AutoLikecheckBox.setText(QCoreApplication.translate("Form", u"\u81ea\u52a8\u70b9\u8d5e", None))
+        self.Raid_ActivityRaidcheckBox.setText(QCoreApplication.translate("Form", u"\u6d3b\u52a8\u626b\u8361", None))
+        self.Raid_RaidDarkcheckBox.setText(QCoreApplication.translate("Form", u"\u6df1\u4e95", None))
+        self.Raid_RaidRivercheckBox.setText(QCoreApplication.translate("Form", u"\u8bb0\u5fc6\u98ce\u66b4", None))
+        self.Raid_RaidFightcheckBox.setText(QCoreApplication.translate("Form", u"\u4f53\u529b\u526f\u672c", None))
+        self.FarmMaterial_ProgressLabel.setText(QCoreApplication.translate("Form", u"\u4e3b\u7ebf\u8fdb\u5ea6", None))
+        self.FarmMaterial_SweepCountLabel.setText(QCoreApplication.translate("Form", u"\u6bcf\u5173\u626b\u8361\u6b21\u6570", None))
+        self.FarmMaterial_裂生冰晶锥checkBox.setText(QCoreApplication.translate("Form", u"\u88c2\u751f\u51b0\u6676\u9525", None))
+        self.FarmMaterial_异化尖刺骨片checkBox.setText(QCoreApplication.translate("Form", u"\u5f02\u5316\u5c16\u523a\u9aa8\u7247", None))
+        self.FarmMaterial_结霜毒砂晶checkBox.setText(QCoreApplication.translate("Form", u"\u7ed3\u971c\u6bd2\u7802\u6676", None))
+        self.FarmMaterial_衰变暮辉晶checkBox.setText(QCoreApplication.translate("Form", u"\u8870\u53d8\u66ae\u8f89\u6676", None))
+        self.FarmMaterial_异化真红囊胞checkBox.setText(QCoreApplication.translate("Form", u"\u5f02\u5316\u771f\u7ea2\u56ca\u80de", None))
+        self.FarmMaterial_沉雾泪晶checkBox.setText(QCoreApplication.translate("Form", u"\u6c89\u96fe\u6cea\u6676", None))
+        self.FarmMaterial_异化棘状角checkBox.setText(QCoreApplication.translate("Form", u"\u5f02\u5316\u68d8\u72b6\u89d2", None))
+        self.FarmMaterial_异化暗凝胶checkBox.setText(QCoreApplication.translate("Form", u"\u5f02\u5316\u6697\u51dd\u80f6", None))
+        self.FarmMaterial_繁盛曲铜晶checkBox.setText(QCoreApplication.translate("Form", u"\u7e41\u76db\u66f2\u94dc\u6676", None))
+        self.FarmMaterial_异化拟怪腕足checkBox.setText(QCoreApplication.translate("Form", u"\u5f02\u5316\u62df\u602a\u8155\u8db3", None))
+        self.FarmMaterial_异化诡影鞘翅checkBox.setText(QCoreApplication.translate("Form", u"\u5f02\u5316\u8be1\u5f71\u9798\u7fc5", None))
+        self.FarmMaterial_燃念赤晶checkBox.setText(QCoreApplication.translate("Form", u"\u71c3\u5ff5\u8d64\u6676", None))
+        self.FarmMaterial_PreviewLabel.setText(QCoreApplication.translate("Form", u"\u672a\u9009\u62e9\u6750\u6599", None))
         self.LogBox.setTitle("")
-        self.DeviceLabel.setText(
-            QCoreApplication.translate("Form", "\u8bbe\u5907", None)
-        )
-        self.DeviceRefreshButton.setText(
-            QCoreApplication.translate("Form", "\u5237\u65b0", None)
-        )
-        self.TaskStatusLabel.setText(
-            QCoreApplication.translate("Form", "\u7a7a\u95f2", None)
-        )
-        self.LinkStartButton.setText(
-            QCoreApplication.translate("Form", "Link Start\uff01", None)
-        )
-        self.tabWidget.setTabText(
-            self.tabWidget.indexOf(self.working),
-            QCoreApplication.translate("Form", "\u4e00\u952e\u957f\u8349", None),
-        )
-        # if QT_CONFIG(accessibility)
+        self.DeviceLabel.setText(QCoreApplication.translate("Form", u"\u8bbe\u5907", None))
+        self.DeviceRefreshButton.setText(QCoreApplication.translate("Form", u"\u5237\u65b0", None))
+        self.TaskStatusLabel.setText(QCoreApplication.translate("Form", u"\u7a7a\u95f2", None))
+        self.LinkStartButton.setText(QCoreApplication.translate("Form", u"Link Start\uff01", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.working), QCoreApplication.translate("Form", u"\u4e00\u952e\u957f\u8349", None))
+#if QT_CONFIG(accessibility)
         self.settings.setAccessibleName("")
-        # endif // QT_CONFIG(accessibility)
-        self.tabWidget.setTabText(
-            self.tabWidget.indexOf(self.settings),
-            QCoreApplication.translate("Form", "\u8bbe\u7f6e", None),
-        )
-        self.UpdateBox.setTitle(
-            QCoreApplication.translate("Form", "\u66f4\u65b0\u68c0\u6d4b", None)
-        )
-        self.CheckUpdatecheckBox.setText(
-            QCoreApplication.translate("Form", "\u542f\u52a8\u65f6\u68c0\u67e5\u66f4\u65b0", None)
-        )
-        self.CheckUpdateButton.setText(
-            QCoreApplication.translate("Form", "\u68c0\u67e5\u66f4\u65b0", None)
-        )
-        self.GameBox.setTitle(
-            QCoreApplication.translate("Form", "\u6e38\u620f\u8bbe\u7f6e", None)
-        )
-        self.GamePathLabel.setText(
-            QCoreApplication.translate("Form", "\u6e38\u620f\u5730\u5740", None)
-        )
-        self.GamePathEdit.setPlaceholderText(
-            QCoreApplication.translate(
-                "Form", "\u6a21\u62df\u5668\u6216\u6e38\u620fexe\u8def\u5f84,\u7559\u7a7a\u5219\u4f7f\u7528ADB\u542f\u52a8", None
-            )
-        )
-        self.BrowseButton.setText(
-            QCoreApplication.translate("Form", "\u6d4f\u89c8...", None)
-        )
-        self.GameArgsLabel.setText(
-            QCoreApplication.translate("Form", "\u9644\u52a0\u53c2\u6570", None)
-        )
-        self.GameArgsEdit.setPlaceholderText(
-            QCoreApplication.translate(
-                "Form", "\u542f\u52a8\u53c2\u6570,\u4ee5\u7a7a\u683c\u5206\u9694", None
-            )
-        )
-        self.RunBox.setTitle(
-            QCoreApplication.translate("Form", "\u8fd0\u884c\u8bbe\u7f6e", None)
-        )
-        self.AutoRuncheckBox.setText(
-            QCoreApplication.translate("Form", "\u542f\u52a8\u540e\u81ea\u52a8\u8fd0\u884c", None)
-        )
-        self.AfterFinishLabel.setText(
-            QCoreApplication.translate("Form", "\u7ed3\u675f\u540e\u884c\u4e3a", None)
-        )
-
+#endif // QT_CONFIG(accessibility)
+        self.UpdateBox.setTitle(QCoreApplication.translate("Form", u"\u66f4\u65b0\u68c0\u6d4b", None))
+        self.CheckUpdatecheckBox.setText(QCoreApplication.translate("Form", u"\u542f\u52a8\u65f6\u68c0\u67e5\u66f4\u65b0", None))
+        self.CheckUpdateButton.setText(QCoreApplication.translate("Form", u"\u68c0\u67e5\u66f4\u65b0", None))
+        self.GameBox.setTitle(QCoreApplication.translate("Form", u"\u6e38\u620f\u8bbe\u7f6e", None))
+        self.GamePathLabel.setText(QCoreApplication.translate("Form", u"\u6e38\u620f\u5730\u5740", None))
+        self.GamePathEdit.setPlaceholderText(QCoreApplication.translate("Form", u"\u6a21\u62df\u5668\u6216\u6e38\u620fexe\u8def\u5f84,\u7559\u7a7a\u5219\u4f7f\u7528ADB\u542f\u52a8", None))
+        self.BrowseButton.setText(QCoreApplication.translate("Form", u"\u6d4f\u89c8...", None))
+        self.GameArgsLabel.setText(QCoreApplication.translate("Form", u"\u9644\u52a0\u53c2\u6570", None))
+        self.GameArgsEdit.setPlaceholderText(QCoreApplication.translate("Form", u"\u542f\u52a8\u53c2\u6570,\u4ee5\u7a7a\u683c\u5206\u9694", None))
+        self.RunBox.setTitle(QCoreApplication.translate("Form", u"\u8fd0\u884c\u8bbe\u7f6e", None))
+        self.AutoRuncheckBox.setText(QCoreApplication.translate("Form", u"\u542f\u52a8\u540e\u81ea\u52a8\u8fd0\u884c", None))
+        self.AfterFinishLabel.setText(QCoreApplication.translate("Form", u"\u7ed3\u675f\u540e\u884c\u4e3a", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.settings), QCoreApplication.translate("Form", u"\u8bbe\u7f6e", None))
     # retranslateUi
+

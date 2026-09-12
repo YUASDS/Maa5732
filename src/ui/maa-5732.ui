@@ -205,6 +205,27 @@
              </layout>
             </item>
             <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_farm">
+              <item>
+               <widget class="QCheckBox" name="FarmMaterialcheckBox">
+                <property name="text">
+                 <string>刷材料</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="FarmMaterialButton">
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="icon">
+                 <iconset theme="QIcon::ThemeIcon::DocumentProperties"/>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
              <layout class="QHBoxLayout" name="horizontalLayout_10">
               <item>
                <widget class="QCheckBox" name="SupervisioncheckBox">
@@ -437,7 +458,155 @@
                </layout>
               </widget>
               <widget class="QWidget" name="RestPage_2"/>
-              <widget class="QWidget" name="RestPage_1"/>
+              <widget class="QWidget" name="RestPage_1">
+               <layout class="QVBoxLayout" name="verticalLayout_farm">
+                <item>
+                 <layout class="QHBoxLayout" name="horizontalLayout_farm_top">
+                  <item>
+                   <widget class="QLabel" name="FarmMaterial_ProgressLabel">
+                    <property name="text">
+                     <string>主线进度</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QComboBox" name="FarmMaterial_ProgressModeCombo"/>
+                  </item>
+                  <item>
+                   <widget class="QComboBox" name="FarmMaterial_ProgressCombo"/>
+                  </item>
+                  <item>
+                   <widget class="QLabel" name="FarmMaterial_SweepCountLabel">
+                    <property name="text">
+                     <string>每关扫荡次数</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QComboBox" name="FarmMaterial_SweepCountCombo"/>
+                  </item>
+                  <item>
+                   <spacer name="horizontalSpacer_farm">
+                    <property name="orientation">
+                     <enum>Qt::Orientation::Horizontal</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>40</width>
+                      <height>20</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <widget class="QScrollArea" name="FarmMaterial_ScrollArea">
+                  <property name="widgetResizable">
+                   <bool>true</bool>
+                  </property>
+                  <widget class="QWidget" name="FarmMaterial_ScrollContents">
+                   <layout class="QGridLayout" name="FarmMaterial_Grid">
+                    <item row="0" column="0">
+                     <widget class="QCheckBox" name="FarmMaterial_裂生冰晶锥checkBox">
+                      <property name="text">
+                       <string>裂生冰晶锥</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="0" column="1">
+                     <widget class="QCheckBox" name="FarmMaterial_异化尖刺骨片checkBox">
+                      <property name="text">
+                       <string>异化尖刺骨片</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="0" column="2">
+                     <widget class="QCheckBox" name="FarmMaterial_结霜毒砂晶checkBox">
+                      <property name="text">
+                       <string>结霜毒砂晶</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="1" column="0">
+                     <widget class="QCheckBox" name="FarmMaterial_衰变暮辉晶checkBox">
+                      <property name="text">
+                       <string>衰变暮辉晶</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="1" column="1">
+                     <widget class="QCheckBox" name="FarmMaterial_异化真红囊胞checkBox">
+                      <property name="text">
+                       <string>异化真红囊胞</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="1" column="2">
+                     <widget class="QCheckBox" name="FarmMaterial_沉雾泪晶checkBox">
+                      <property name="text">
+                       <string>沉雾泪晶</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="2" column="0">
+                     <widget class="QCheckBox" name="FarmMaterial_异化棘状角checkBox">
+                      <property name="text">
+                       <string>异化棘状角</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="2" column="1">
+                     <widget class="QCheckBox" name="FarmMaterial_异化暗凝胶checkBox">
+                      <property name="text">
+                       <string>异化暗凝胶</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="2" column="2">
+                     <widget class="QCheckBox" name="FarmMaterial_繁盛曲铜晶checkBox">
+                      <property name="text">
+                       <string>繁盛曲铜晶</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="3" column="0">
+                     <widget class="QCheckBox" name="FarmMaterial_异化拟怪腕足checkBox">
+                      <property name="text">
+                       <string>异化拟怪腕足</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="3" column="1">
+                     <widget class="QCheckBox" name="FarmMaterial_异化诡影鞘翅checkBox">
+                      <property name="text">
+                       <string>异化诡影鞘翅</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="3" column="2">
+                     <widget class="QCheckBox" name="FarmMaterial_燃念赤晶checkBox">
+                      <property name="text">
+                       <string>燃念赤晶</string>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="FarmMaterial_PreviewLabel">
+                  <property name="text">
+                   <string>未选择材料</string>
+                  </property>
+                  <property name="wordWrap">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
              </widget>
             </item>
            </layout>
