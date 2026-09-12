@@ -32,17 +32,21 @@ CHAPTER_ENTER = (0.80, 0.65)      # 点开章节节点后的详情面板里, 再
 DIAL_DRAG_UP = ([0.032, 0.60, 10, 10], [0.032, 0.30, 10, 10], 0.8)     # 旋盘推进
 DIAL_DRAG_DOWN = ([0.032, 0.30, 10, 10], [0.032, 0.60, 10, 10], 0.8)   # 旋盘回退
 STAGE_LIST_SWIPE = ([0.80, 0.59, 10, 10], [0.30, 0.59, 10, 10], 0.8)   # 关卡列表横向滑动
-MAX_DIAL_DRAGS = 6                # 旋盘最多拖动次数
-MAX_LIST_SWIPES = 4               # 关卡列表最多滑动次数
+MAX_DIAL_DRAGS = 10               # 旋盘最多拖动次数(章节可能跨多个主线位置)
+MAX_LIST_SWIPES = 8               # 关卡列表最多滑动次数(单章最多 18 关)
 # 扫荡流程按钮文本(与 Raid.py 的资源关一致)
 SWEEP_ENTRY = "连续扫荡"
 START_SWEEP = "开始扫荡"
 DONE = "完成"
 CANCEL = "取消"
-# 次数设置: 沿用资源关的弹窗坐标(同一套 UI); 若主线弹窗不同, 真机首跑日志会暴露
+# 次数设置(弹窗「米诺斯管理系统-体力消耗」, 坐标来自探测, 与资源关同一套 UI)
+# 滑条范围 1..5, 两端为 -/+ 按钮; 次数显示在「选择次数」右侧(OCR 常合并成 选择次数3)
 SWEEP_PLUS = (0.7164, 0.6458)
 SWEEP_MINUS = (0.2875, 0.6458)
-SWEEP_COUNT_ROI = [0.25, 0.588, 0.1, 0.04]
+SWEEP_COUNT_ROI = [0.25, 0.565, 0.15, 0.07]
+# 弹窗滑条右端值受当前体力限制(探测时为 5), 不是游戏硬上限:
+# 因此界面允许填 1..20, 实际能加到哪里由弹窗决定, 加不动就按当前次数继续。
+SWEEP_MAX = 20
 # 主线导航常量是否可用(探测已完成)
 NAV_READY = True
 
@@ -275,29 +279,45 @@ class FarmMaterial(MyCustomAction):
         return "ok"
 
     def _set_sweep_count(self, clicker, target: int) -> bool:
-        """点加号设次数; 连续两次无法增加判定体力不足, 返回 False"""
-        target = max(1, min(int(target), 20))
+        """把滑条次数调到目标值(滑条右端受体力限制, 加不动就按当前次数继续)
+
+        读不到次数(界面差异)或怎么点都不动时不当作体力不足, 告警后按当前次数继续 ——
+        体力不足由弹窗自身与「开始扫荡」失败暴露, 避免坐标误差导致提前停机。
+        """
+        target = max(1, min(int(target), SWEEP_MAX))
         current = self._read_sweep_count(clicker)
+        if current is None:
+            logger.warning("材料刷取: 未读到扫荡次数, 按界面当前次数继续")
+            return True
         stall = 0
-        while current is None or current < target:
+        while current < target:
             clicker.click_rate(*SWEEP_PLUS)
-            stop_sleep(0.6)
+            stop_sleep(0.5)
             new = self._read_sweep_count(clicker)
-            if new is None or (current is not None and new <= current):
+            if new is None or new <= current:
                 stall += 1
-                if stall >= 2:
-                    logger.warning(f"材料刷取: 次数无法增加到{target}(当前{current}), 判定体力不足")
-                    return False
+                if stall >= 3:
+                    logger.warning(
+                        f"材料刷取: 次数未能从 {current} 加到 {target}, 按当前次数继续"
+                    )
+                    return True
             else:
                 stall = 0
                 current = new
         return True
 
     def _read_sweep_count(self, clicker):
-        for text, _score, _box in clicker.ocr_roi(SWEEP_COUNT_ROI, sleep_time=0.3) or []:
-            match = re.search(r"(\d+)", text)
-            if match:
-                return int(match.group(1))
+        """读弹窗里的次数; OCR 常把标签与数值合并成「选择次数3」"""
+        items = clicker.ocr_roi(SWEEP_COUNT_ROI, sleep_time=0.3) or []
+        for text, _score, _box in items:
+            if "选择次数" in text.replace(" ", ""):
+                digits = re.findall(r"\d+", text)
+                if digits:
+                    return int(digits[-1])
+        for text, _score, _box in items:
+            digits = re.findall(r"\d+", text)
+            if digits:
+                return int(digits[-1])
         return None
 
     # ------------------------------------------------------------ 续刷

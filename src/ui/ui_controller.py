@@ -237,7 +237,7 @@ class MyWidget(QWidget):
         self.ui.Raid_StromLevelCombo.addItems(["1", "2", "3", "4", "5"])
         self.ui.Supervision_RewardCombo.addItems(["体力", "监察徽印"])
         # 材料刷取
-        self.ui.FarmMaterial_SweepCountCombo.addItems([str(i) for i in range(1, 21)])
+        self.ui.FarmMaterial_SweepCountCombo.addItems([str(i) for i in range(1, 21)])  # 实际能加到多少由弹窗按体力决定
         self.ui.FarmMaterial_ProgressModeCombo.addItems(["自动", "手动"])
         for chap in self.material_data["chapters"]["主线"]:
             self.ui.FarmMaterial_ProgressCombo.addItem(str(chap))
