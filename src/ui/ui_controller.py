@@ -3,6 +3,7 @@ import os
 import sys
 import re
 import html
+import shutil
 import threading
 import subprocess
 from functools import partial
