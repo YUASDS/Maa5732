@@ -26,6 +26,66 @@ def adb_run(cmd, **kwargs):
     return subprocess.run(cmd, **kwargs)
 
 
+def emulator_alias_port(address: str):
+    """emulator-5554 与 127.0.0.1:5555 指向同一设备,返回等价adb端口,非该形式返回None"""
+    if not isinstance(address, str) or not address.startswith("emulator-"):
+        return None
+    try:
+        return int(address[len("emulator-"):]) + 1
+    except ValueError:
+        return None
+
+
+def same_device(address_a: str, address_b: str) -> bool:
+    """两个adb地址是否指向同一设备(兼容 emulator-<n> 与 127.0.0.1:<n+1> 两种写法)"""
+    if not address_a or not address_b:
+        return False
+    if address_a == address_b:
+        return True
+    port = emulator_alias_port(address_a)
+    if port is not None and address_b == f"127.0.0.1:{port}":
+        return True
+    port = emulator_alias_port(address_b)
+    if port is not None and address_a == f"127.0.0.1:{port}":
+        return True
+    return False
+
+
+def online_devices():
+    """返回 adb devices 中状态为 device 的地址集合
+
+    offline/unauthorized 等不可用状态不计入;查询失败返回 None(调用方据此放弃过滤)。
+    """
+    try:
+        result = adb_run(
+            [cfg.adb_dir, "devices"],
+            stdout=PIPE,
+            stderr=PIPE,
+            timeout=10,
+        )
+    except Exception as e:
+        logger.warning(f"查询ADB设备状态失败: {e}")
+        return None
+    online = set()
+    for line in result.stdout.decode(errors="ignore").splitlines()[1:]:
+        parts = line.split()
+        if len(parts) >= 2 and parts[1] == "device":
+            online.add(parts[0])
+    return online
+
+
+def filter_online_devices(devices: list) -> list:
+    """按 adb devices 的真实状态过滤设备列表,查询失败时原样返回(保守处理)"""
+    online = online_devices()
+    if online is None:
+        return list(devices)
+    return [
+        device
+        for device in devices
+        if any(same_device(getattr(device, "address", ""), item) for item in online)
+    ]
+
+
 def change_size(adb_adress):
     result = adb_run(
         [cfg.adb_dir, "-s", adb_adress, "shell", "wm", "size"],
@@ -59,7 +119,11 @@ def start_server():
 
 
 def connect_adb_devices(addresses=None):
-    """尝试连接常见模拟器端口及指定地址的ADB设备,已连接的跳过"""
+    """尝试连接常见模拟器端口及指定地址的ADB设备
+
+    adb connect 对"端口开着但不是可用adb设备"也会返回0并打印connected,
+    因此必须用 adb devices 的真实状态复核,只把真正就绪的设备记为已连接。
+    """
     targets = list(EMULATOR_ADDRESSES)
     if addresses:
         for address in addresses:
@@ -67,22 +131,12 @@ def connect_adb_devices(addresses=None):
                 targets.append(address)
     if not targets:
         return
-    try:
-        result = adb_run(
-            [cfg.adb_dir, "devices"],
-            stdout=PIPE,
-            stderr=PIPE,
-            timeout=10,
-        )
-        known = set()
-        for line in result.stdout.decode(errors="ignore").splitlines()[1:]:
-            parts = line.split()
-            if len(parts) >= 2 and parts[1] != "offline":
-                known.add(parts[0])
-    except Exception:
-        known = set()
+    online_before = online_devices()
+    if online_before is None:
+        online_before = set()
+    claimed = []
     for address in targets:
-        if address in known:
+        if any(same_device(address, item) for item in online_before):
             continue
         try:
             result = adb_run(
@@ -97,7 +151,17 @@ def connect_adb_devices(addresses=None):
             result.returncode == 0
             and "connected" in result.stdout.decode(errors="ignore")
         ):
+            claimed.append(address)
+    if not claimed:
+        return
+    online_after = online_devices()
+    if online_after is None:
+        online_after = set()
+    for address in claimed:
+        if any(same_device(address, item) for item in online_after):
             logger.debug(f"ADB设备已连接: {address}")
+        else:
+            logger.warning(f"ADB端口无响应(不是可用设备,已忽略): {address}")
 
 
 # 常见模拟器进程名(按优先级)
