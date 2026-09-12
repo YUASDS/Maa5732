@@ -38,16 +38,17 @@ from src.utils.updater import (
     verify_sha256,
     extract_zip,
 )
-from src.utils.adb import close_emulator
+from src.utils.adb import close_emulator, emulator_alias_port, same_device
 from src.utils.click import start_by_exe
 from src.core import version
 from src.core.ThreadManager import TaskerThread
-from src.core.TaskerManager import list_adb_devices
+from src.core.TaskerManager import TASKER_MANAGER, list_adb_devices
 
 
 class MySignal(QObject):
     button = Signal(QPushButton, str)
     finish = Signal(str)
+    error = Signal(str)
     update = Signal(object, object, object, bool)
     devices = Signal(list, list)
     download_progress = Signal(int, int)
@@ -92,6 +93,9 @@ class MyWidget(QWidget):
         self.signal.devices.connect(self.handle_devices)
         self.signal.download_progress.connect(self.handle_download_progress)
         self.signal.download_done.connect(self.handle_download_done)
+        self.signal.error.connect(self.handle_error)
+        # 设备等待失败等异常由 TaskerManager 回调,再经信号切回界面线程
+        TASKER_MANAGER.error_callback = self.notify_error
 
         self.ui = Ui_Form()
         self.ui.setupUi(self)
@@ -400,6 +404,18 @@ class MyWidget(QWidget):
             pass
         return address
 
+    def notify_error(self, message: str):
+        """由工作线程调用,经信号切回界面线程提示用户"""
+        self.signal.error.emit(message)
+
+    def handle_error(self, message: str):
+        self.ui.TaskStatusLabel.setText("设备连接失败")
+        logger.error(message)
+        if QSystemTrayIcon.isSystemTrayAvailable():
+            self.tray.showMessage(
+                "MAA5732", message, QSystemTrayIcon.MessageIcon.Critical, 10000
+            )
+
     def handle_devices(self, names: list, addresses: list):
         combo = self.ui.DeviceCombo
         combo.blockSignals(True)
@@ -409,11 +425,20 @@ class MyWidget(QWidget):
             combo.addItem(text, address)
         if cfg.adb_address:
             index = combo.findData(cfg.adb_address)
+            if index < 0:
+                # findData 只做字符串比较,按别名等价(emulator-<n> / 127.0.0.1:<n+1>)再找一次
+                for i in range(combo.count()):
+                    if same_device(combo.itemData(i) or "", cfg.adb_address):
+                        index = i
+                        break
             if index >= 0:
                 combo.setCurrentIndex(index)
-            elif not self._is_alias(cfg.adb_address, addresses):
-                combo.addItem(cfg.adb_address, cfg.adb_address)
-                combo.setCurrentIndex(combo.count() - 1)
+            else:
+                # 不再把不可用地址塞进下拉框,避免被误选后写入配置
+                combo.setCurrentIndex(-1)
+                logger.warning(
+                    f"配置的ADB设备 {cfg.adb_address} 当前不可用,运行时将尝试重新连接"
+                )
         elif combo.count() > 0:
             combo.setCurrentIndex(0)
             cfg.adb_address = combo.currentData() or ""
@@ -424,13 +449,8 @@ class MyWidget(QWidget):
 
     def _is_alias(self, address, connected):
         """判断emulator-*地址是否为已连接端口的别名"""
-        if not address.startswith("emulator-"):
-            return False
-        try:
-            port = int(address[len("emulator-"):])
-        except ValueError:
-            return False
-        return f"127.0.0.1:{port + 1}" in connected
+        port = emulator_alias_port(address)
+        return port is not None and f"127.0.0.1:{port}" in connected
 
     def save_device(self):
         cfg.adb_address = self.ui.DeviceCombo.currentData() or ""
