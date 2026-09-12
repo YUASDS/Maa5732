@@ -458,9 +458,6 @@ class Ui_Form(object):
         self.verticalLayout_2.addLayout(self.horizontalLayout_15)
 
         self.tabWidget.addTab(self.working, "")
-        self.tools = QWidget()
-        self.tools.setObjectName("tools")
-        self.tabWidget.addTab(self.tools, "")
         self.settings = QWidget()
         self.settings.setObjectName("settings")
         self.settings.setMouseTracking(False)
@@ -651,10 +648,6 @@ class Ui_Form(object):
         self.tabWidget.setTabText(
             self.tabWidget.indexOf(self.working),
             QCoreApplication.translate("Form", "\u4e00\u952e\u957f\u8349", None),
-        )
-        self.tabWidget.setTabText(
-            self.tabWidget.indexOf(self.tools),
-            QCoreApplication.translate("Form", "\u5de5\u5177", None),
         )
         # if QT_CONFIG(accessibility)
         self.settings.setAccessibleName("")

@@ -520,11 +520,6 @@
         </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tools">
-      <attribute name="title">
-       <string>工具</string>
-      </attribute>
-     </widget>
       <widget class="QWidget" name="settings">
        <property name="mouseTracking">
         <bool>false</bool>
