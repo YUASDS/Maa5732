@@ -26,7 +26,8 @@ name = __file__.split("\\")[-1].split(".")[0]
 
 # ---------------------------------------------------------------- 导航常量
 # 全部比例坐标来自 docs/nav_probe/(2026-09-12 真机探测)
-CRISIS_MANAGE = (0.74, 0.89)      # 主界面 -> 危机管理
+CRISIS_MANAGE = (0.74, 0.89)      # 主界面 -> 危机管理(固定坐标兜底)
+CRISIS_MANAGE_TEXT = "危机管理"        # 优先按文本点击(主界面可能被活动弹窗盖住)
 DIST_CITY = "狄斯城"               # 关卡选择界面底部模式标签(0.481,0.885); 已在该页时再点无害
 CHAPTER_ENTER = (0.80, 0.65)      # 点开章节节点后的详情面板里, 再点标题区进入关卡列表
 DIAL_DRAG_UP = ([0.032, 0.60, 10, 10], [0.032, 0.30, 10, 10], 0.8)     # 旋盘推进
@@ -47,6 +48,10 @@ SWEEP_COUNT_ROI = [0.25, 0.565, 0.15, 0.07]
 # 弹窗滑条右端值受当前体力限制(探测时为 5), 不是游戏硬上限:
 # 因此界面允许填 1..20, 实际能加到哪里由弹窗决定, 加不动就按当前次数继续。
 SWEEP_MAX = 20
+# 迪斯城地图上才会出现的文本(用于确认真的进了地图)
+MAP_MARKERS = ("历史模式", "特别行动", "内海", "锈河", "全天开放")
+# 会盖住主界面的面板/页面文本(命中就先退掉)
+OVERLAY_MARKERS = ("局长信息", "生涯", "称号", "头像框")  # 注意: 禁闭者/管理局 是主界面按钮, 不能放进来
 # 主线导航常量是否可用(探测已完成)
 NAV_READY = True
 
@@ -172,7 +177,8 @@ class FarmMaterial(MyCustomAction):
         """在迪斯城地图上找「章节节点 + 进度」这一对文本(如 N7 与 1/6), 拼成 N7-1/6"""
         if not NAV_READY:
             return ""
-        self._open_map(clicker)
+        if not self._open_map(clicker):
+            return ""
         items = self._screen_items(clicker)
         fractions = [
             (text.replace(" ", ""), box)
@@ -202,37 +208,81 @@ class FarmMaterial(MyCustomAction):
         """当前屏幕 OCR 结果 [(text, score, box)]"""
         return clicker.ocr_roi([0, 0, 1, 1], sleep_time=sleep_time) or []
 
-    def _click_text(self, clicker, text) -> bool:
-        """OCR 点击一段文本; 失败返回 False"""
-        detail = clicker.ocr_click(text)
-        return bool(detail and detail.status.succeeded)
+    def _screen_texts(self, clicker, sleep_time=0.4) -> list:
+        return [t.replace(" ", "") for t, _s, _b in self._screen_items(clicker, sleep_time)]
 
-    def _open_map(self, clicker) -> None:
-        """回到迪斯城地图(关卡选择界面的主线条目)"""
+    def _click_text(self, clicker, text) -> bool:
+        """点击屏幕上与 text 完全相同的文本块; 找不到返回 False
+
+        注意 clicker.ocr_click 是子串匹配(MaaFramework 的 expected): 点 "13" 会命中
+        "10:30:00" 这类文本; 所以这里先全屏 OCR 做精确匹配, 再点该文本框中心。
+        """
+        target = str(text).replace(" ", "")
+        for screen_text, _score, box in self._screen_items(clicker):
+            if screen_text.replace(" ", "") == target:
+                x = (box[0] + box[2] / 2) / cfg.width
+                y = (box[1] + box[3] / 2) / cfg.height
+                logger.debug(f"材料刷取: 点击 {target} @ ({x:.3f},{y:.3f})")
+                clicker.click_rate(x, y)
+                return True
+        return False
+
+    def _open_map(self, clicker) -> bool:
+        """回到迪斯城地图(关卡选择界面的主线条目); 返回是否确认在地图上
+
+        每轮先看屏幕再决定动作: 已在目标界面 -> 返回; 有遮挡面板(局长信息等) -> 退掉;
+        主界面 -> 点「危机管理」(优先按文本, 找不到用固定坐标); 其它页面 -> 退一层。
+        """
         clicker.check_return_home()
-        clicker.click_rate(*CRISIS_MANAGE)
-        clicker.ocr_click(DIST_CITY)
-        stop_sleep(1.0)
+        for _ in range(6):
+            texts = self._screen_texts(clicker)
+            if any(marker in texts for marker in MAP_MARKERS):
+                if self._click_text(clicker, DIST_CITY):   # 确保在主线(狄斯城)标签
+                    stop_sleep(1.0)
+                return True
+            if any(marker in texts for marker in OVERLAY_MARKERS):
+                logger.info("材料刷取: 关闭遮挡面板")
+                clicker.back()
+            elif CRISIS_MANAGE_TEXT in texts:
+                self._click_text(clicker, CRISIS_MANAGE_TEXT)
+            else:
+                logger.info("材料刷取: 当前不在主界面, 退一层: " + " | ".join(texts[:8]))
+                clicker.back()
+            stop_sleep(1.5)
+        logger.warning(
+            "材料刷取: 未能进入迪斯城地图; 当前屏幕: "
+            + " | ".join(self._screen_texts(clicker)[:15])
+        )
+        return False
 
     def _goto_chapter(self, clicker, chapter) -> bool:
         """在地图上找到目标章节节点并点开; 不可见时按方向拖旋盘(search by drag)"""
         if self._click_text(clicker, chapter):
             return True
         target = int(re.sub(r"\D", "", chapter) or 0)
+        texts = self._screen_texts(clicker)
+        logger.info("材料刷取: 地图可见 " + " ".join(texts[:15]))
         for _ in range(MAX_DIAL_DRAGS):
             visible = [
-                int(re.sub(r"\D", "", text.replace(" ", "")))
-                for text, _s, _b in self._screen_items(clicker)
-                if re.match(r"^N\d+$", text.replace(" ", ""))
+                int(re.sub(r"\D", "", text))
+                for text in self._screen_texts(clicker)
+                if re.match(r"^N?\d+$", text)
             ]
             # 目标比可见的最新章节还新 -> 推进, 否则回退
-            drag = DIAL_DRAG_UP if target > max(visible or [0]) else DIAL_DRAG_DOWN
-            logger.debug(f"材料刷取: 地图上未见 {chapter}, 拖旋盘({drag is DIAL_DRAG_UP and '推进' or '回退'})")
+            advance = target > max(visible or [0])
+            drag = DIAL_DRAG_UP if advance else DIAL_DRAG_DOWN
+            logger.info(
+                f"材料刷取: 地图未见 {chapter}(可见章节 {sorted(visible)}), "
+                f"拖旋盘{'推进' if advance else '回退'}"
+            )
             clicker.swape(drag[0], drag[1], drag[2])
             stop_sleep(1.2)
             if self._click_text(clicker, chapter):
                 return True
-        logger.warning(f"材料刷取: 地图上未能找到章节 {chapter}")
+        logger.warning(
+            f"材料刷取: 地图上未能找到章节 {chapter}; 当前屏幕: "
+            + " | ".join(self._screen_texts(clicker)[:15])
+        )
         return False
 
     def _select_stage(self, clicker, stage) -> bool:
@@ -242,12 +292,16 @@ class FarmMaterial(MyCustomAction):
                 return True
             clicker.swape(STAGE_LIST_SWIPE[0], STAGE_LIST_SWIPE[1], STAGE_LIST_SWIPE[2])
             stop_sleep(1.0)
-        logger.warning(f"材料刷取: 关卡列表里未找到 {stage['code']}")
+        logger.warning(
+            f"材料刷取: 关卡列表里未找到 {stage['code']}; 当前屏幕: "
+            + " | ".join(self._screen_texts(clicker)[:15])
+        )
         return False
 
     def _farm_one(self, clicker, stage) -> str:
         """扫荡单个关卡; 返回 "ok" / "no_stamina" / "unavailable" """
-        self._open_map(clicker)
+        if not self._open_map(clicker):
+            return "unavailable"
         if not self._goto_chapter(clicker, stage["chapter"]):
             clicker.return_home()
             return "unavailable"
