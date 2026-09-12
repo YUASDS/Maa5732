@@ -52,6 +52,18 @@ python main.py
 
 首次运行会自动生成 `assets/config/config.json`；该文件是运行时配置，不纳入版本控制。
 
+## 日志
+
+- 日志同时写入 `logs/`（保留最近7天）和运行终端
+- **在终端里运行**（源码 `python main.py`，或 `MAA_5732_x.y.z.exe`）会直接在当前终端输出日志；双击启动则不显示控制台窗口
+- 注意：exe 是窗口程序，终端不会等待它结束，提示符会立刻返回，日志随后异步打印在该终端里；需要阻塞等待可用 `start /wait MAA_5732_x.y.z.exe`
+- 终端默认输出 INFO 级别，需要更详细(排查问题)时可以：
+
+```bat
+set MAA5732_LOG_LEVEL=DEBUG
+MAA_5732_0.2.3.exe
+```
+
 ## 打包
 
 ```bash
