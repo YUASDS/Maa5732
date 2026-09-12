@@ -86,9 +86,8 @@ DEFAULT_CONFIG = {
     "dismissed_update": "",
     "adb_address": "",
     "activity_remaining": {"date": "", "items": []},
-    # 材料刷取: 主线进度缓存(探测失败时兜底) 与 当天未完成的材料
+    # 材料刷取: 主线进度缓存(探测失败时兜底)
     "main_progress": "",
-    "material_remaining": {"date": "", "items": []},
 }
 
 CONFIG_PATH = asset_path("config", "config.json")
@@ -151,7 +150,6 @@ class cfg:
     adb_address = config.get("adb_address", "")
     activity_remaining = config.get("activity_remaining", {"date": "", "items": []})
     main_progress = config.get("main_progress", "")
-    material_remaining = config.get("material_remaining", {"date": "", "items": []})
     game_process = None
 
 
@@ -168,7 +166,6 @@ def save_confg():
         "adb_address": cfg.adb_address,
         "activity_remaining": cfg.activity_remaining,
         "main_progress": cfg.main_progress,
-        "material_remaining": cfg.material_remaining,
     }
     os.makedirs(os.path.dirname(CONFIG_PATH), exist_ok=True)
     with open(CONFIG_PATH, "w", encoding="utf-8") as f:

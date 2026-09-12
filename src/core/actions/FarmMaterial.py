@@ -101,35 +101,33 @@ class FarmMaterial(MyCustomAction):
     def run(self, context: Context, argv: MyCustomAction.RunArg) -> bool:
         self.param = self._load_param(argv.custom_action_param)
         if not self.param["materials"]:
-            logger.info("材料刷取: 未选择材料,跳过")
+            logger.debug("材料刷取: 未选择材料,跳过")
             return True
-
+        logger.info(f"材料刷取 开始")
         clicker = Click(context)
         data = load_material_data()
         progress = self._resolve_progress(clicker)
+        # 记录本次主线位置: _goto_chapter 靠它推断旋盘该往哪个方向拖
+        self._progress = progress
         key = progress_key(progress)
 
-        remaining = self._load_remaining() or list(self.param["materials"])
-        if self._load_remaining():
-            logger.info(f"材料刷取: 恢复上次剩余材料: {', '.join(remaining)}")
+        remaining = list(self.param["materials"])
         if not remaining:
-            logger.info("材料刷取: 无待刷材料,跳过")
+            logger.debug("材料刷取: 无待刷材料,跳过")
             return True
         if not NAV_READY:
             logger.error("材料刷取: 主线导航坐标尚未探测(见 docs/nav_probe/coords.md), 本次跳过")
             return True
 
         plans = plan(data, remaining, key)
-        pending: list = []
         try:
             for index, mat in enumerate(remaining):
                 entry = plans.get(mat) or {"stage": None, "fallbacks": [], "rejected": []}
                 if entry["stage"] is None:
                     logger.warning(f"材料刷取: {mat} 无可用关卡(进度不足),跳过")
-                    pending.append(mat)
                     continue
                 chain = ([entry["stage"]] + entry["fallbacks"])[:MAX_CANDIDATES]
-                logger.info("材料刷取: " + mat + " 候选 " + " -> ".join(s["code"] for s in chain))
+                logger.debug("材料刷取: " + mat + " 候选 " + " -> ".join(s["code"] for s in chain))
                 result = "unavailable"
                 for stage in chain:
                     stamina = f"体力{stage['stamina']}" if stage.get("stamina") else "体力未知"
@@ -140,18 +138,17 @@ class FarmMaterial(MyCustomAction):
                     logger.warning(f"材料刷取: {stage['code']} 不可用, 回退下一个候选")
                 if result == "ok":
                     continue
-                pending.append(mat)
                 if result == "no_stamina":
-                    pending += remaining[index + 1:]
+                    # 体力不足: 本次到此为止; 剩下的材料本次不再尝试(spec §7: 不续刷)
+                    skipped = remaining[index + 1:]
+                    if skipped:
+                        logger.warning("材料刷取: 体力不足, 本次跳过: " + ", ".join(skipped))
                     break
+                logger.warning(f"材料刷取: {mat} 本次未刷到, 跳过")
         except StopException:
-            pending += remaining[index:]  # 当前及之后都算未完成
-            self._save_remaining(pending)
+            # 不续刷: 未完成的材料只体现在日志里, 不写盘(spec §7)
+            logger.warning("材料刷取: 手动停止, 未完成的材料不再记录")
             raise
-        if pending:
-            self._save_remaining(pending)
-        else:
-            self._clear_remaining()
         logger.info("材料刷取: 完成")
         return True
 
@@ -159,7 +156,6 @@ class FarmMaterial(MyCustomAction):
     @staticmethod
     def _to_dict(raw) -> dict:
         """框架传入的是 JSON 字符串(可能被再编码一层), 也可能已是 dict
-
         与 Raid._to_dict 同款: maa 的 RunArg.custom_action_param 声明为 str。
         """
         value = raw
@@ -773,22 +769,6 @@ class FarmMaterial(MyCustomAction):
             if digits:
                 return int(digits[-1])
         return None
-
-    # ------------------------------------------------------------ 续刷
-    def _save_remaining(self, items) -> None:
-        cfg.material_remaining = {"date": cfg.formatted_today, "items": list(items)}
-        save_confg()
-        logger.warning(f"材料刷取: 记录剩余任务: {', '.join(items)}")
-
-    def _clear_remaining(self) -> None:
-        cfg.material_remaining = {"date": "", "items": []}
-        save_confg()
-
-    def _load_remaining(self) -> list:
-        data = cfg.material_remaining or {}
-        if data.get("date") == cfg.formatted_today and data.get("items"):
-            return list(data["items"])
-        return []
 
     def stop(self) -> None:
         pass
