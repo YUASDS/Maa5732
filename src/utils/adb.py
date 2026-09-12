@@ -118,6 +118,19 @@ def start_server():
     )
 
 
+# 已提示过"无响应"的地址,避免等待设备期间反复刷屏(恢复在线后清除)
+_dead_port_reported: set = set()
+
+
+def _report_dead_port(address: str) -> None:
+    """幽灵端口只提示一次,重复提示降级为DEBUG"""
+    if address in _dead_port_reported:
+        logger.debug(f"ADB端口仍无响应(不是可用设备,已忽略): {address}")
+        return
+    _dead_port_reported.add(address)
+    logger.warning(f"ADB端口无响应(不是可用设备,已忽略): {address}")
+
+
 def connect_adb_devices(addresses=None):
     """尝试连接常见模拟器端口及指定地址的ADB设备
 
@@ -137,6 +150,7 @@ def connect_adb_devices(addresses=None):
     claimed = []
     for address in targets:
         if any(same_device(address, item) for item in online_before):
+            _dead_port_reported.discard(address)
             continue
         try:
             result = adb_run(
@@ -159,9 +173,10 @@ def connect_adb_devices(addresses=None):
         online_after = set()
     for address in claimed:
         if any(same_device(address, item) for item in online_after):
+            _dead_port_reported.discard(address)
             logger.debug(f"ADB设备已连接: {address}")
         else:
-            logger.warning(f"ADB端口无响应(不是可用设备,已忽略): {address}")
+            _report_dead_port(address)
 
 
 # 常见模拟器进程名(按优先级)
