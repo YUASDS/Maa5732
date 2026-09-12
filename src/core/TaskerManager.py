@@ -13,7 +13,12 @@ from maa.notification_handler import NotificationHandler, NotificationType
 
 from src.utils.configs import cfg
 from src.utils.paths import asset_path
-from src.utils.adb import start_server, restart, connect_adb_devices
+from src.utils.adb import (
+    start_server,
+    restart,
+    connect_adb_devices,
+    filter_online_devices,
+)
 from src.utils.click import STOP
 from src.utils.model import StopException
 
@@ -109,11 +114,11 @@ class TaskerManager:
         logger.info("初始化成功!!!")
 
     def _find_devices(self):
-        """优先使用Maa自动检测,回退到自带ADB"""
+        """优先使用Maa自动检测,回退到自带ADB;只返回真正在线的设备"""
         devices = Toolkit.find_adb_devices()
         if not devices:
             devices = Toolkit.find_adb_devices(cfg.adb_dir)
-        return devices
+        return filter_online_devices(devices)
 
     def _wait_device(self):
         """优先直接连接所选设备,失败则轮询查找,可被停止操作取消"""
@@ -215,11 +220,11 @@ TASKER_MANAGER = TaskerManager()
 
 
 def list_adb_devices():
-    """返回当前已连接的ADB设备列表"""
+    """返回当前已连接的ADB设备列表(只包含真正在线的设备,避免界面选到幽灵端口)"""
     try:
         Toolkit.init_option(cfg.tool_kit_option)
         connect_adb_devices([cfg.adb_address] if cfg.adb_address else None)
-        return (
+        devices = (
             Toolkit.find_adb_devices()
             or Toolkit.find_adb_devices(cfg.adb_dir)
             or []
@@ -227,3 +232,4 @@ def list_adb_devices():
     except Exception as e:
         logger.warning(f"查找ADB设备失败: {e}")
         return []
+    return filter_online_devices(devices)
