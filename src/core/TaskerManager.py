@@ -88,6 +88,12 @@ class MyNotificationHandler(NotificationHandler):
         print(f"on_unknown_notification: {msg}, {details}")
 
 
+# 输入方式: 含 MaaTouch, 否则拖动类手势会被游戏忽略
+INPUT_METHODS = MaaAdbInputMethodEnum.All
+# 说明: 不要只开 AdbShell —— 它走 adb shell input 合成事件, 游戏对"拖动/滑动"类手势
+# (主线位置旋盘、章节横滑等)不响应; All 让框架优先使用 MaaTouch 真实触摸流。
+
+
 class TaskerManager:
     resource: Resource
     controller: AdbController
@@ -104,6 +110,8 @@ class TaskerManager:
         Toolkit.init_option(cfg.tool_kit_option)
         # Toolkit.init_option(user_path)
 
+        # 输入方式: 不要只开 AdbShell —— 它走 adb shell input 合成事件, 游戏对"拖动/滑动"
+        # 类手势不认(主线位置旋盘、章节横滑等会没反应); All 让框架优先用 MaaTouch 真实触摸流。
         self.resource = Resource()
         res_job = self.resource.post_bundle(asset_path("resource"))
         res_job.wait()
@@ -112,7 +120,7 @@ class TaskerManager:
             adb_path=device.adb_path,
             address=device.address,
             screencap_methods=device.screencap_methods,
-            input_methods=MaaAdbInputMethodEnum.AdbShell,
+            input_methods=INPUT_METHODS,
             config={},
             # config=device.config,
         )
@@ -154,7 +162,7 @@ class TaskerManager:
                 adb_path=cfg.adb_dir,
                 address=address,
                 screencap_methods=MaaAdbScreencapMethodEnum.All,
-                input_methods=MaaAdbInputMethodEnum.AdbShell,
+                input_methods=INPUT_METHODS,
                 config={},
             )
             job = controller.post_connection()
@@ -182,7 +190,7 @@ class TaskerManager:
             adb_path=cfg.adb_dir,
             address=cfg.adb_address,
             screencap_methods=MaaAdbScreencapMethodEnum.All,
-            input_methods=MaaAdbInputMethodEnum.AdbShell,
+            input_methods=INPUT_METHODS,
             config={},
         )
 

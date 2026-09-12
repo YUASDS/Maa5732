@@ -47,9 +47,17 @@ check("支持二次编码的字符串", p_dbl["materials"] == ["裂生冰晶锥"
 check("非法字符串不抛异常", f._load_param("not-json")["materials"] == [])
 
 # ---------------------------------------------------------------- 执行桩
-MAIN_SCREEN = ["危机管理", "情绪检测", "公告", "邮箱"]
-MAP_SCREEN = ["历史模式", "特别行动", "内海", "狄斯城",
-              "N10", "N10-1", "连续扫荡", "开始扫荡", "完成"]
+# 主界面只放主界面元素(这样 _open_map 必须真的去点「危机管理」);
+# 第一次点击后切换到"综合界面"(含所有后续步骤的文本), 便于验证后续点击序列。
+MAIN_SCREEN = ["危机管理", "情绪检测", "公告", "邮箱", "狄斯", "ReN7-2"]
+UNION_SCREEN = [
+    "历史模式", "特别行动", "内海", "狄斯城",           # 副本界面标记
+    "新城", "远邦",                                     # 旋盘标签
+    "N10", "N8", "1/6", "完成前置关卡",                 # 章节节点/面板
+    "N10-1", "N10-2", "任务进度1/6",                    # 关卡列表
+    "编号：N10-1", "单次扫荡", "连续扫荡", "行动开始",    # 关卡详情
+    "选择次数3", "设置阵容", "开始扫荡", "完成",          # 次数弹窗
+]
 
 
 class FakeStatus:
@@ -70,20 +78,25 @@ class FakeClick:
         self.context = context
         self.calls = []
         self.main_screen = list(MAIN_SCREEN)
-        self.map_screen = list(MAP_SCREEN)
+        self.union_screen = list(UNION_SCREEN)
         self.screen = self.main_screen
         self.count_text = "3"
+        self.advanced = False
 
     def ocr_roi(self, roi, sleep_time=None):
         self.calls.append(("ocr_roi", (roi,)))
         if list(roi) == [0, 0, 1, 1]:
-            return [(t, 0.99, [100 + 80 * i, 400, 60, 20]) for i, t in enumerate(self.screen)]
+            # 假框: 同一行、x 递增(进度配对要求章节在进度文本左侧且同一行)
+            return [(t, 0.99, [100 + 60 * i, 400, 50, 20])
+                    for i, t in enumerate(self.screen)]
         return [(self.count_text, 0.99, [400, 430, 40, 20])]
 
     def click_rate(self, x, y, offset_x=5, offset_y=5):
-        """任何点击都视为"从主界面进入了地图", 供 _open_map 的状态机推进"""
+        """第一次点击(点「危机管理」)后进入后续步骤的综合界面"""
         self.calls.append(("click_rate", (x, y)))
-        self.screen = self.map_screen
+        if not self.advanced:
+            self.advanced = True
+            self.screen = self.union_screen
         return FakeDetail()
 
     def ocr(self, *args, **kwargs):
@@ -149,21 +162,27 @@ check("点了『完成』", "完成" in ok_texts, str(ok_texts))
 check("结算后等待 >= 10s", any(s >= 10 for s in slept), str(slept))
 check("正常路径不写剩余列表", not written, str(written))
 
-# --- 关卡候选回退: 链首关卡编号点不到 -> 顺链下一个候选 ---
+# --- 运行中回退: 首选关卡不可扫荡 -> 顺链下一个候选 ---
 clicked.clear()
 written.clear()
 _entry = plan(load_material_data(), ["裂生冰晶锥"], progress_key("N10"))["裂生冰晶锥"]
 _head, _second = _entry["stage"]["code"], _entry["fallbacks"][0]["code"]
-fake_retry = FakeClick()
-fake_retry.map_screen = [t for t in MAP_SCREEN if t != _head] + ["N8", _second]
-FM.Click = lambda context: fake_retry
+attempted = []
+_orig_farm_one = FM.FarmMaterial._farm_one
+
+
+def fake_farm_one(self, clicker, stage):
+    attempted.append(stage["code"])
+    return "unavailable" if stage["code"] == _head else "ok"
+
+
+FM.FarmMaterial._farm_one = fake_farm_one
+FM.Click = lambda context: FakeClick()
 FarmMaterial().run(context=None, argv=arg(dict(MANUAL, **{"裂生冰晶锥checkBox": True})))
-ok2 = [t for t, ok in clicked if ok]
 check(f"首选({_head})不可用时回退到次选({_second})",
-      _second in ok2 and _head not in ok2, str(ok2))
-check("点不到的首选记为失败", (_head, False) in clicked,
-      str([c for c in clicked if not c[1]][:3]))
+      attempted[:2] == [_head, _second], str(attempted[:3]))
 check("回退成功不写剩余列表", not written, str(written))
+FM.FarmMaterial._farm_one = _orig_farm_one
 
 # --- 体力不足: 弹窗里出现『取消』 -> 当前及后续材料写入剩余 ---
 class CancelClick(FakeClick):
@@ -216,13 +235,13 @@ check("手动模式不探测进度", not called, str(called))
 # --- 进度探测: 地图上「章节文本 + x/y」配对(用真实实现) ---
 FM.FarmMaterial._detect_progress = _orig_detect
 detect_fake = FakeClick()
-detect_fake.map_screen = ["历史模式", "特别行动", "狄斯城", "N7", "1/6"]
+detect_fake.union_screen = ["N7", "1/6", "历史模式", "特别行动", "狄斯城"]
 FM.Click = lambda context: detect_fake
 detected = FarmMaterial()._detect_progress(detect_fake)
 check("进度配对解析(N7 + 1/6 -> N7-1/6)", detected == "N7-1/6", str(detected))
 
 detect_fake2 = FakeClick()
-detect_fake2.map_screen = ["历史模式", "特别行动", "狄斯城", "N7"]
+detect_fake2.union_screen = ["N7", "历史模式", "特别行动", "狄斯城"]
 check("只有章节没有进度 -> 空", FarmMaterial()._detect_progress(detect_fake2) == "")
 
 print(f"\nPASS={len(PASSES)} FAIL={len(FAILS)}")
