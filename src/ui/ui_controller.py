@@ -10,7 +10,7 @@ from functools import partial
 from typing import Union
 from loguru import logger
 from PySide6.QtCore import QObject, Signal, QTimer, QUrl, Qt
-from PySide6.QtGui import QDesktopServices
+from PySide6.QtGui import QDesktopServices, QIcon
 from PySide6.QtWidgets import (
     QApplication,
     QWidget,
@@ -29,6 +29,7 @@ from src.ui.theme import apply_theme
 from src.ui.title_bar import TitleBar
 from src.ui.update_dialog import UpdateDialog
 from src.utils.configs import cfg, save_confg
+from src.utils.paths import asset_path
 from src.utils.updater import (
     check_update,
     is_newer,
@@ -94,6 +95,8 @@ class MyWidget(QWidget):
 
         self.ui = Ui_Form()
         self.ui.setupUi(self)
+        # ui.py 由 Designer 生成,图标路径依赖工作目录,这里用绝对路径重新设置
+        self.setWindowIcon(QIcon(asset_path("resource", "image", "logo.ico")))
         self.title_bar = TitleBar(self)
         self.ui.verticalLayout_3.insertWidget(0, self.title_bar)
         self.setup_tray()

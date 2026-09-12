@@ -36,3 +36,26 @@ Base on [MaaFramwork](https://github.com/MaaXYZ/MaaFramework)
 - 启动功能可直接启动游戏，基本稳定
 - 其他功能的需要在游戏主界面开始
 - 目前能完成游戏中的大部分日常
+
+## 从源码运行
+
+```bash
+pip install -r requirements.txt
+python main.py
+```
+
+`assets/` 中只有模板图、`assets/ui` 图标等必需资源纳入版本控制，以下资源需要自行准备（Release 压缩包中已包含）：
+
+- `assets/adb/adb.exe`：自带adb，缺失时回退使用系统PATH中的adb
+- `assets/resource/model/ocr/`：OCR模型(det.onnx / rec.onnx / keys.txt)
+- `assets/MaaCommonAssets/`：可选，MaaFramework公共资源
+
+首次运行会自动生成 `assets/config/config.json`；该文件是运行时配置，不纳入版本控制。
+
+## 打包
+
+```bash
+python build.py
+```
+
+生成的 `MAA_5732_x.y.z.exe` 与 `MAA_5732_x.y.z.zip` 位于 `dist/`。

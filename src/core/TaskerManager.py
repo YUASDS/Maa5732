@@ -12,6 +12,7 @@ from maa.context import Context
 from maa.notification_handler import NotificationHandler, NotificationType
 
 from src.utils.configs import cfg
+from src.utils.paths import asset_path
 from src.utils.adb import start_server, restart, connect_adb_devices
 from src.utils.click import STOP
 from src.utils.model import StopException
@@ -85,7 +86,7 @@ class TaskerManager:
         # Toolkit.init_option(user_path)
 
         self.resource = Resource()
-        res_job = self.resource.post_bundle("assets/resource")
+        res_job = self.resource.post_bundle(asset_path("resource"))
         res_job.wait()
         device = self._wait_device()
         self.controller = AdbController(

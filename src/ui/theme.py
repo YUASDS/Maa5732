@@ -1,5 +1,16 @@
 from PySide6.QtWidgets import QApplication
 
+from src.utils.paths import asset_path
+
+
+def _asset_url(*parts: str) -> str:
+    """Qt 样式表中的图片路径需要正斜杠及绝对路径"""
+    return asset_path(*parts).replace("\\", "/")
+
+
+_CHECK_ICON = _asset_url("ui", "check.png")
+_DOWN_ARROW_ICON = _asset_url("ui", "down-arrow.png")
+
 THEME = """
 QWidget {
     font-family: "Microsoft YaHei UI", "Microsoft YaHei", "Segoe UI", sans-serif;
@@ -235,6 +246,11 @@ QPushButton#DismissButton {
 }
 QPushButton#DismissButton:hover { color: #E6E9F0; }
 """
+
+# 图片路径改为绝对路径,避免工作目录变化导致图标丢失
+THEME = THEME.replace("assets/ui/check.png", _CHECK_ICON).replace(
+    "assets/ui/down-arrow.png", _DOWN_ARROW_ICON
+)
 
 
 def apply_theme(app: QApplication):

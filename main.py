@@ -8,17 +8,19 @@ from PySide6.QtWidgets import QApplication
 
 from src.ui.ui_controller import MyWidget
 from src.ui.theme import apply_theme
+from src.utils.paths import BASE_DIR
 
 LOG_KEEP_DAYS = 7
+LOG_DIR = os.path.join(BASE_DIR, "logs")
 
 
 def clean_old_logs(days=LOG_KEEP_DAYS):
     """清理logs目录中超过指定天数的日志文件"""
     cutoff = time.time() - days * 86400
-    if not os.path.exists("logs"):
+    if not os.path.isdir(LOG_DIR):
         return
-    for name in os.listdir("logs"):
-        path = os.path.join("logs", name)
+    for name in os.listdir(LOG_DIR):
+        path = os.path.join(LOG_DIR, name)
         try:
             if os.path.isfile(path) and os.path.getmtime(path) < cutoff:
                 os.remove(path)
@@ -35,11 +37,10 @@ def clean_update_dir():
 
 
 now_time = datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S")
-if not os.path.exists("logs"):
-    os.makedirs("logs")
+os.makedirs(LOG_DIR, exist_ok=True)
 clean_old_logs()
 clean_update_dir()
-logger.add(f"logs/{now_time}.log")
+logger.add(os.path.join(LOG_DIR, f"{now_time}.log"))
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     apply_theme(app)

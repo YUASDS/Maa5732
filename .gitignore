@@ -5,9 +5,16 @@ __pycache__/
 
 # custom ignore
 test
-assets
 logs
 .vscode
+screenshot.png
+
+# assets: 必需资源(模板图、config默认值、assets/ui)纳入版本控制,仅忽略体积大或运行期产物
+assets/adb/
+assets/debug/
+assets/MaaCommonAssets/
+assets/resource/model/
+assets/config/config.json
 
 # C extensions
 *.so
