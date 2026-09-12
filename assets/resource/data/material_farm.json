@@ -31,7 +31,6 @@
   "沉雾泪晶": {
    "rarity": "紫",
    "type": "升阶道具",
-   "effect": "禁闭者升阶的必要道具",
    "icon": "material/沉雾泪晶.png",
    "candidate_chapters": [
     "10",
@@ -226,7 +225,6 @@
   "结霜毒砂晶": {
    "rarity": "紫",
    "type": "升阶道具",
-   "effect": "禁闭者升阶的必要道具",
    "icon": "material/结霜毒砂晶.png",
    "candidate_chapters": [
     "10",
@@ -442,7 +440,6 @@
   "繁盛曲铜晶": {
    "rarity": "紫",
    "type": "升阶道具",
-   "effect": "禁闭者升阶的必要道具",
    "icon": "material/繁盛曲铜晶.png",
    "candidate_chapters": [
     "10",
@@ -638,7 +635,6 @@
   "裂生冰晶锥": {
    "rarity": "紫",
    "type": "升阶道具",
-   "effect": "禁闭者升阶的必要道具",
    "icon": "material/裂生冰晶锥.png",
    "candidate_chapters": [
     "11",
@@ -854,7 +850,6 @@
   "衰变暮辉晶": {
    "rarity": "紫",
    "type": "升阶道具",
-   "effect": "禁闭者升阶的必要道具",
    "icon": "material/衰变暮辉晶.png",
    "candidate_chapters": [
     "11",
@@ -1050,7 +1045,6 @@
   "燃念赤晶": {
    "rarity": "紫",
    "type": "升阶道具",
-   "effect": "禁闭者升阶的必要道具",
    "icon": "material/燃念赤晶.png",
    "candidate_chapters": [
     "10",
@@ -1247,7 +1241,6 @@
   "异化棘状角": {
    "rarity": "紫",
    "type": "升阶道具",
-   "effect": "禁闭者升阶的必要道具",
    "icon": "material/异化棘状角.png",
    "candidate_chapters": [
     "10",
@@ -1443,7 +1436,6 @@
   "异化拟怪腕足": {
    "rarity": "紫",
    "type": "升阶道具",
-   "effect": "禁闭者升阶的必要道具",
    "icon": "material/异化拟怪腕足.png",
    "candidate_chapters": [
     "10",
@@ -1641,7 +1633,6 @@
   "异化尖刺骨片": {
    "rarity": "紫",
    "type": "升阶道具",
-   "effect": "禁闭者升阶的必要道具",
    "icon": "material/异化尖刺骨片.png",
    "candidate_chapters": [
     "10",
@@ -1818,7 +1809,6 @@
   "异化暗凝胶": {
    "rarity": "紫",
    "type": "升阶道具",
-   "effect": "禁闭者升阶的必要道具",
    "icon": "material/异化暗凝胶.png",
    "candidate_chapters": [
     "11",
@@ -2050,7 +2040,6 @@
   "异化真红囊胞": {
    "rarity": "紫",
    "type": "升阶道具",
-   "effect": "禁闭者升阶的必要道具",
    "icon": "material/异化真红囊胞.png",
    "candidate_chapters": [
     "10",
@@ -2283,7 +2272,6 @@
   "异化诡影鞘翅": {
    "rarity": "紫",
    "type": "升阶道具",
-   "effect": "禁闭者升阶的必要道具",
    "icon": "material/异化诡影鞘翅.png",
    "candidate_chapters": [
     "10",
