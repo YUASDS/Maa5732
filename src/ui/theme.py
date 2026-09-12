@@ -76,6 +76,10 @@ QCheckBox::indicator:disabled {
     background-color: #262B38;
     border-color: #343B4D;
 }
+/* 材料选择是两列密排网格,中间栏较窄,收紧行距以免出现横向滚动条 */
+QWidget#FarmMaterial_ScrollContents QCheckBox {
+    spacing: 4px;
+}
 QPushButton {
     background-color: #262B38;
     border: 1px solid #343B4D;
@@ -162,6 +166,13 @@ QTextBrowser {
     border-radius: 8px;
     padding: 6px;
     font-family: "Cascadia Mono", Consolas, "Microsoft YaHei UI", monospace;
+    font-size: 12px;
+}
+QLabel#SnapshotLabel {
+    background-color: #0D0F15;
+    border: 1px solid #2A2F3D;
+    border-radius: 8px;
+    color: #5A6274;
     font-size: 12px;
 }
 QScrollBar:vertical {

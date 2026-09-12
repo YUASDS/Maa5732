@@ -21,6 +21,8 @@ from PySide6.QtWidgets import (QApplication, QCheckBox, QComboBox, QGridLayout,
     QStackedWidget, QTabWidget, QTextBrowser, QVBoxLayout,
     QWidget)
 
+from src.ui.snapshot import SnapshotLabel
+
 class Ui_Form(object):
     def setupUi(self, Form):
         if not Form.objectName():
@@ -41,6 +43,8 @@ class Ui_Form(object):
         self.horizontalLayout_8.setObjectName(u"horizontalLayout_8")
         self.SelectBox = QGroupBox(self.working)
         self.SelectBox.setObjectName(u"SelectBox")
+        self.SelectBox.setMinimumSize(QSize(190, 0))
+        self.SelectBox.setMaximumSize(QSize(230, 16777215))
         self.verticalLayout = QVBoxLayout(self.SelectBox)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.horizontalLayout = QHBoxLayout()
@@ -147,6 +151,22 @@ class Ui_Form(object):
 
         self.verticalLayout.addLayout(self.horizontalLayout_7)
 
+        self.horizontalLayout_farm = QHBoxLayout()
+        self.horizontalLayout_farm.setObjectName(u"horizontalLayout_farm")
+        self.FarmMaterialcheckBox = QCheckBox(self.SelectBox)
+        self.FarmMaterialcheckBox.setObjectName(u"FarmMaterialcheckBox")
+
+        self.horizontalLayout_farm.addWidget(self.FarmMaterialcheckBox)
+
+        self.FarmMaterialButton = QPushButton(self.SelectBox)
+        self.FarmMaterialButton.setObjectName(u"FarmMaterialButton")
+        self.FarmMaterialButton.setIcon(icon1)
+
+        self.horizontalLayout_farm.addWidget(self.FarmMaterialButton)
+
+
+        self.verticalLayout.addLayout(self.horizontalLayout_farm)
+
         self.horizontalLayout_9 = QHBoxLayout()
         self.horizontalLayout_9.setObjectName(u"horizontalLayout_9")
         self.RaidcheckBox = QCheckBox(self.SelectBox)
@@ -163,22 +183,6 @@ class Ui_Form(object):
 
 
         self.verticalLayout.addLayout(self.horizontalLayout_9)
-
-        self.horizontalLayout_farm = QHBoxLayout()
-        self.horizontalLayout_farm.setObjectName(u"horizontalLayout_farm")
-        self.FarmMaterialcheckBox = QCheckBox(self.SelectBox)
-        self.FarmMaterialcheckBox.setObjectName(u"FarmMaterialcheckBox")
-
-        self.horizontalLayout_farm.addWidget(self.FarmMaterialcheckBox)
-
-        self.FarmMaterialButton = QPushButton(self.SelectBox)
-        self.FarmMaterialButton.setObjectName(u"FarmMaterialButton")
-        self.FarmMaterialButton.setIcon(icon1)
-
-        self.horizontalLayout_farm.addWidget(self.FarmMaterialButton)
-
-
-        self.verticalLayout.addLayout(self.horizontalLayout_farm)
 
         self.horizontalLayout_10 = QHBoxLayout()
         self.horizontalLayout_10.setObjectName(u"horizontalLayout_10")
@@ -217,8 +221,12 @@ class Ui_Form(object):
 
         self.SettingBox = QGroupBox(self.working)
         self.SettingBox.setObjectName(u"SettingBox")
+        self.SettingBox.setMinimumSize(QSize(245, 0))
+        self.SettingBox.setMaximumSize(QSize(300, 16777215))
         self.horizontalLayout_14 = QHBoxLayout(self.SettingBox)
+        self.horizontalLayout_14.setSpacing(6)
         self.horizontalLayout_14.setObjectName(u"horizontalLayout_14")
+        self.horizontalLayout_14.setContentsMargins(6, 6, 6, 6)
         self.stackedWidget = QStackedWidget(self.SettingBox)
         self.stackedWidget.setObjectName(u"stackedWidget")
         self.stackedWidget.setCursor(QCursor(Qt.CursorShape.ArrowCursor))
@@ -373,40 +381,56 @@ class Ui_Form(object):
         self.RestPage_1 = QWidget()
         self.RestPage_1.setObjectName(u"RestPage_1")
         self.verticalLayout_farm = QVBoxLayout(self.RestPage_1)
+        self.verticalLayout_farm.setSpacing(6)
         self.verticalLayout_farm.setObjectName(u"verticalLayout_farm")
-        self.horizontalLayout_farm_top = QHBoxLayout()
-        self.horizontalLayout_farm_top.setObjectName(u"horizontalLayout_farm_top")
+        self.verticalLayout_farm.setContentsMargins(2, 2, 2, 2)
+        self.verticalLayout_farm_top = QVBoxLayout()
+        self.verticalLayout_farm_top.setObjectName(u"verticalLayout_farm_top")
+        self.horizontalLayout_farm_progress = QHBoxLayout()
+        self.horizontalLayout_farm_progress.setObjectName(u"horizontalLayout_farm_progress")
         self.FarmMaterial_ProgressLabel = QLabel(self.RestPage_1)
         self.FarmMaterial_ProgressLabel.setObjectName(u"FarmMaterial_ProgressLabel")
 
-        self.horizontalLayout_farm_top.addWidget(self.FarmMaterial_ProgressLabel)
+        self.horizontalLayout_farm_progress.addWidget(self.FarmMaterial_ProgressLabel)
 
         self.FarmMaterial_ProgressModeCombo = QComboBox(self.RestPage_1)
         self.FarmMaterial_ProgressModeCombo.setObjectName(u"FarmMaterial_ProgressModeCombo")
 
-        self.horizontalLayout_farm_top.addWidget(self.FarmMaterial_ProgressModeCombo)
+        self.horizontalLayout_farm_progress.addWidget(self.FarmMaterial_ProgressModeCombo)
 
         self.FarmMaterial_ProgressCombo = QComboBox(self.RestPage_1)
         self.FarmMaterial_ProgressCombo.setObjectName(u"FarmMaterial_ProgressCombo")
 
-        self.horizontalLayout_farm_top.addWidget(self.FarmMaterial_ProgressCombo)
+        self.horizontalLayout_farm_progress.addWidget(self.FarmMaterial_ProgressCombo)
 
+        self.horizontalSpacer_farm_progress = QSpacerItem(20, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_farm_progress.addItem(self.horizontalSpacer_farm_progress)
+
+
+        self.verticalLayout_farm_top.addLayout(self.horizontalLayout_farm_progress)
+
+        self.horizontalLayout_farm_sweep = QHBoxLayout()
+        self.horizontalLayout_farm_sweep.setObjectName(u"horizontalLayout_farm_sweep")
         self.FarmMaterial_SweepCountLabel = QLabel(self.RestPage_1)
         self.FarmMaterial_SweepCountLabel.setObjectName(u"FarmMaterial_SweepCountLabel")
 
-        self.horizontalLayout_farm_top.addWidget(self.FarmMaterial_SweepCountLabel)
+        self.horizontalLayout_farm_sweep.addWidget(self.FarmMaterial_SweepCountLabel)
 
         self.FarmMaterial_SweepCountCombo = QComboBox(self.RestPage_1)
         self.FarmMaterial_SweepCountCombo.setObjectName(u"FarmMaterial_SweepCountCombo")
 
-        self.horizontalLayout_farm_top.addWidget(self.FarmMaterial_SweepCountCombo)
+        self.horizontalLayout_farm_sweep.addWidget(self.FarmMaterial_SweepCountCombo)
 
-        self.horizontalSpacer_farm = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+        self.horizontalSpacer_farm_sweep = QSpacerItem(20, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
-        self.horizontalLayout_farm_top.addItem(self.horizontalSpacer_farm)
+        self.horizontalLayout_farm_sweep.addItem(self.horizontalSpacer_farm_sweep)
 
 
-        self.verticalLayout_farm.addLayout(self.horizontalLayout_farm_top)
+        self.verticalLayout_farm_top.addLayout(self.horizontalLayout_farm_sweep)
+
+
+        self.verticalLayout_farm.addLayout(self.verticalLayout_farm_top)
 
         self.FarmMaterial_ScrollArea = QScrollArea(self.RestPage_1)
         self.FarmMaterial_ScrollArea.setObjectName(u"FarmMaterial_ScrollArea")
@@ -415,6 +439,9 @@ class Ui_Form(object):
         self.FarmMaterial_ScrollContents.setObjectName(u"FarmMaterial_ScrollContents")
         self.FarmMaterial_Grid = QGridLayout(self.FarmMaterial_ScrollContents)
         self.FarmMaterial_Grid.setObjectName(u"FarmMaterial_Grid")
+        self.FarmMaterial_Grid.setHorizontalSpacing(4)
+        self.FarmMaterial_Grid.setVerticalSpacing(4)
+        self.FarmMaterial_Grid.setContentsMargins(0, 0, 0, 0)
         self.FarmMaterial_裂生冰晶锥checkBox = QCheckBox(self.FarmMaterial_ScrollContents)
         self.FarmMaterial_裂生冰晶锥checkBox.setObjectName(u"FarmMaterial_\u88c2\u751f\u51b0\u6676\u9525checkBox")
 
@@ -423,67 +450,61 @@ class Ui_Form(object):
         self.FarmMaterial_异化尖刺骨片checkBox = QCheckBox(self.FarmMaterial_ScrollContents)
         self.FarmMaterial_异化尖刺骨片checkBox.setObjectName(u"FarmMaterial_\u5f02\u5316\u5c16\u523a\u9aa8\u7247checkBox")
 
-        self.FarmMaterial_Grid.addWidget(self.FarmMaterial_异化尖刺骨片checkBox, 0, 1, 1, 1)
+        self.FarmMaterial_Grid.addWidget(self.FarmMaterial_异化尖刺骨片checkBox, 1, 0, 1, 1)
 
         self.FarmMaterial_结霜毒砂晶checkBox = QCheckBox(self.FarmMaterial_ScrollContents)
         self.FarmMaterial_结霜毒砂晶checkBox.setObjectName(u"FarmMaterial_\u7ed3\u971c\u6bd2\u7802\u6676checkBox")
 
-        self.FarmMaterial_Grid.addWidget(self.FarmMaterial_结霜毒砂晶checkBox, 0, 2, 1, 1)
+        self.FarmMaterial_Grid.addWidget(self.FarmMaterial_结霜毒砂晶checkBox, 2, 0, 1, 1)
 
         self.FarmMaterial_衰变暮辉晶checkBox = QCheckBox(self.FarmMaterial_ScrollContents)
         self.FarmMaterial_衰变暮辉晶checkBox.setObjectName(u"FarmMaterial_\u8870\u53d8\u66ae\u8f89\u6676checkBox")
 
-        self.FarmMaterial_Grid.addWidget(self.FarmMaterial_衰变暮辉晶checkBox, 1, 0, 1, 1)
+        self.FarmMaterial_Grid.addWidget(self.FarmMaterial_衰变暮辉晶checkBox, 3, 0, 1, 1)
 
         self.FarmMaterial_异化真红囊胞checkBox = QCheckBox(self.FarmMaterial_ScrollContents)
         self.FarmMaterial_异化真红囊胞checkBox.setObjectName(u"FarmMaterial_\u5f02\u5316\u771f\u7ea2\u56ca\u80decheckBox")
 
-        self.FarmMaterial_Grid.addWidget(self.FarmMaterial_异化真红囊胞checkBox, 1, 1, 1, 1)
+        self.FarmMaterial_Grid.addWidget(self.FarmMaterial_异化真红囊胞checkBox, 4, 0, 1, 1)
 
         self.FarmMaterial_沉雾泪晶checkBox = QCheckBox(self.FarmMaterial_ScrollContents)
         self.FarmMaterial_沉雾泪晶checkBox.setObjectName(u"FarmMaterial_\u6c89\u96fe\u6cea\u6676checkBox")
 
-        self.FarmMaterial_Grid.addWidget(self.FarmMaterial_沉雾泪晶checkBox, 1, 2, 1, 1)
+        self.FarmMaterial_Grid.addWidget(self.FarmMaterial_沉雾泪晶checkBox, 5, 0, 1, 1)
 
         self.FarmMaterial_异化棘状角checkBox = QCheckBox(self.FarmMaterial_ScrollContents)
         self.FarmMaterial_异化棘状角checkBox.setObjectName(u"FarmMaterial_\u5f02\u5316\u68d8\u72b6\u89d2checkBox")
 
-        self.FarmMaterial_Grid.addWidget(self.FarmMaterial_异化棘状角checkBox, 2, 0, 1, 1)
+        self.FarmMaterial_Grid.addWidget(self.FarmMaterial_异化棘状角checkBox, 6, 0, 1, 1)
 
         self.FarmMaterial_异化暗凝胶checkBox = QCheckBox(self.FarmMaterial_ScrollContents)
         self.FarmMaterial_异化暗凝胶checkBox.setObjectName(u"FarmMaterial_\u5f02\u5316\u6697\u51dd\u80f6checkBox")
 
-        self.FarmMaterial_Grid.addWidget(self.FarmMaterial_异化暗凝胶checkBox, 2, 1, 1, 1)
+        self.FarmMaterial_Grid.addWidget(self.FarmMaterial_异化暗凝胶checkBox, 7, 0, 1, 1)
 
         self.FarmMaterial_繁盛曲铜晶checkBox = QCheckBox(self.FarmMaterial_ScrollContents)
         self.FarmMaterial_繁盛曲铜晶checkBox.setObjectName(u"FarmMaterial_\u7e41\u76db\u66f2\u94dc\u6676checkBox")
 
-        self.FarmMaterial_Grid.addWidget(self.FarmMaterial_繁盛曲铜晶checkBox, 2, 2, 1, 1)
+        self.FarmMaterial_Grid.addWidget(self.FarmMaterial_繁盛曲铜晶checkBox, 8, 0, 1, 1)
 
         self.FarmMaterial_异化拟怪腕足checkBox = QCheckBox(self.FarmMaterial_ScrollContents)
         self.FarmMaterial_异化拟怪腕足checkBox.setObjectName(u"FarmMaterial_\u5f02\u5316\u62df\u602a\u8155\u8db3checkBox")
 
-        self.FarmMaterial_Grid.addWidget(self.FarmMaterial_异化拟怪腕足checkBox, 3, 0, 1, 1)
+        self.FarmMaterial_Grid.addWidget(self.FarmMaterial_异化拟怪腕足checkBox, 9, 0, 1, 1)
 
         self.FarmMaterial_异化诡影鞘翅checkBox = QCheckBox(self.FarmMaterial_ScrollContents)
         self.FarmMaterial_异化诡影鞘翅checkBox.setObjectName(u"FarmMaterial_\u5f02\u5316\u8be1\u5f71\u9798\u7fc5checkBox")
 
-        self.FarmMaterial_Grid.addWidget(self.FarmMaterial_异化诡影鞘翅checkBox, 3, 1, 1, 1)
+        self.FarmMaterial_Grid.addWidget(self.FarmMaterial_异化诡影鞘翅checkBox, 10, 0, 1, 1)
 
         self.FarmMaterial_燃念赤晶checkBox = QCheckBox(self.FarmMaterial_ScrollContents)
         self.FarmMaterial_燃念赤晶checkBox.setObjectName(u"FarmMaterial_\u71c3\u5ff5\u8d64\u6676checkBox")
 
-        self.FarmMaterial_Grid.addWidget(self.FarmMaterial_燃念赤晶checkBox, 3, 2, 1, 1)
+        self.FarmMaterial_Grid.addWidget(self.FarmMaterial_燃念赤晶checkBox, 11, 0, 1, 1)
 
         self.FarmMaterial_ScrollArea.setWidget(self.FarmMaterial_ScrollContents)
 
         self.verticalLayout_farm.addWidget(self.FarmMaterial_ScrollArea)
-
-        self.FarmMaterial_PreviewLabel = QLabel(self.RestPage_1)
-        self.FarmMaterial_PreviewLabel.setObjectName(u"FarmMaterial_PreviewLabel")
-        self.FarmMaterial_PreviewLabel.setWordWrap(True)
-
-        self.verticalLayout_farm.addWidget(self.FarmMaterial_PreviewLabel)
 
         self.stackedWidget.addWidget(self.RestPage_1)
 
@@ -494,19 +515,26 @@ class Ui_Form(object):
 
         self.LogBox = QGroupBox(self.working)
         self.LogBox.setObjectName(u"LogBox")
-        self.horizontalLayout_11 = QHBoxLayout(self.LogBox)
-        self.horizontalLayout_11.setObjectName(u"horizontalLayout_11")
+        self.LogBox.setMinimumSize(QSize(300, 0))
+        self.verticalLayout_log = QVBoxLayout(self.LogBox)
+        self.verticalLayout_log.setObjectName(u"verticalLayout_log")
+        self.SnapshotLabel = SnapshotLabel(self.LogBox)
+        self.SnapshotLabel.setObjectName(u"SnapshotLabel")
+
+        self.verticalLayout_log.addWidget(self.SnapshotLabel)
+
         self.textBrowser = QTextBrowser(self.LogBox)
         self.textBrowser.setObjectName(u"textBrowser")
 
-        self.horizontalLayout_11.addWidget(self.textBrowser)
+        self.verticalLayout_log.addWidget(self.textBrowser)
 
+        self.verticalLayout_log.setStretch(0, 1)
+        self.verticalLayout_log.setStretch(1, 2)
 
         self.horizontalLayout_8.addWidget(self.LogBox)
 
-        self.horizontalLayout_8.setStretch(0, 1)
-        self.horizontalLayout_8.setStretch(1, 1)
-        self.horizontalLayout_8.setStretch(2, 1)
+        self.horizontalLayout_8.setStretch(1, 2)
+        self.horizontalLayout_8.setStretch(2, 3)
 
         self.verticalLayout_2.addLayout(self.horizontalLayout_8)
 
@@ -570,6 +598,10 @@ class Ui_Form(object):
         self.CheckUpdateButton.setObjectName(u"CheckUpdateButton")
 
         self.horizontalLayout_16.addWidget(self.CheckUpdateButton)
+
+        self.horizontalSpacer_update = QSpacerItem(20, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_16.addItem(self.horizontalSpacer_update)
 
 
         self.verticalLayout_13.addWidget(self.UpdateBox)
@@ -637,6 +669,10 @@ class Ui_Form(object):
 
         self.horizontalLayout_20.addWidget(self.AfterFinishCombo)
 
+        self.horizontalSpacer_after_finish = QSpacerItem(20, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_20.addItem(self.horizontalSpacer_after_finish)
+
 
         self.verticalLayout_15.addLayout(self.horizontalLayout_20)
 
@@ -659,7 +695,7 @@ class Ui_Form(object):
 
     def retranslateUi(self, Form):
         Form.setWindowTitle(QCoreApplication.translate("Form", u"Maa5732", None))
-        self.SelectBox.setTitle("")
+        self.SelectBox.setTitle(QCoreApplication.translate("Form", u"\u4efb\u52a1", None))
         self.StartToHomeActioncheckBox.setText(QCoreApplication.translate("Form", u"\u542f\u52a8", None))
         self.StartButton.setText("")
         self.GuildcheckBox.setText(QCoreApplication.translate("Form", u"\u5de5\u4f1a\u6350\u8d60", None))
@@ -671,15 +707,15 @@ class Ui_Form(object):
         self.BureaucheckBox.setText(QCoreApplication.translate("Form", u"\u7ba1\u7406\u5c40", None))
         self.FriendscheckBox.setText(QCoreApplication.translate("Form", u"\u597d\u53cb", None))
         self.FriendsButton.setText("")
-        self.RaidcheckBox.setText(QCoreApplication.translate("Form", u"\u526f\u672c", None))
-        self.RaidButton.setText("")
         self.FarmMaterialcheckBox.setText(QCoreApplication.translate("Form", u"\u5237\u6750\u6599", None))
         self.FarmMaterialButton.setText("")
+        self.RaidcheckBox.setText(QCoreApplication.translate("Form", u"\u526f\u672c", None))
+        self.RaidButton.setText("")
         self.SupervisioncheckBox.setText(QCoreApplication.translate("Form", u"\u76d1\u5bdf\u5bc6\u4ee4", None))
         self.SupervisionButton.setText("")
         self.SlectAllButton.setText(QCoreApplication.translate("Form", u"\u5168\u9009", None))
         self.ClearAllButton.setText(QCoreApplication.translate("Form", u"\u6e05\u7a7a", None))
-        self.SettingBox.setTitle("")
+        self.SettingBox.setTitle(QCoreApplication.translate("Form", u"\u4efb\u52a1\u8bbe\u7f6e", None))
         self.StartToHomeAction_StartAPPcheckBox.setText(QCoreApplication.translate("Form", u"\u542f\u52a8\u6e38\u620f", None))
         self.Purchase_FriendShopcheckBox.setText(QCoreApplication.translate("Form", u"\u53cb\u60c5\u70b9\u5546\u5e97", None))
         self.Purchase_ActivityShopcheckBox.setText(QCoreApplication.translate("Form", u"\u6d3b\u52a8\u5546\u5e97", None))
@@ -704,8 +740,7 @@ class Ui_Form(object):
         self.FarmMaterial_异化拟怪腕足checkBox.setText(QCoreApplication.translate("Form", u"\u5f02\u5316\u62df\u602a\u8155\u8db3", None))
         self.FarmMaterial_异化诡影鞘翅checkBox.setText(QCoreApplication.translate("Form", u"\u5f02\u5316\u8be1\u5f71\u9798\u7fc5", None))
         self.FarmMaterial_燃念赤晶checkBox.setText(QCoreApplication.translate("Form", u"\u71c3\u5ff5\u8d64\u6676", None))
-        self.FarmMaterial_PreviewLabel.setText(QCoreApplication.translate("Form", u"\u672a\u9009\u62e9\u6750\u6599", None))
-        self.LogBox.setTitle("")
+        self.LogBox.setTitle(QCoreApplication.translate("Form", u"\u8fd0\u884c\u72b6\u6001", None))
         self.DeviceLabel.setText(QCoreApplication.translate("Form", u"\u8bbe\u5907", None))
         self.DeviceRefreshButton.setText(QCoreApplication.translate("Form", u"\u5237\u65b0", None))
         self.TaskStatusLabel.setText(QCoreApplication.translate("Form", u"\u7a7a\u95f2", None))
