@@ -14,7 +14,7 @@ from src.utils.paths import BASE_DIR
 LOG_KEEP_DAYS = 7
 LOG_DIR = os.path.join(BASE_DIR, "logs")
 # 控制台日志级别,可用环境变量 MAA5732_LOG_LEVEL 调整(如 DEBUG)
-LOG_LEVEL = os.environ.get("MAA5732_LOG_LEVEL", "INFO").upper()
+LOG_LEVEL = os.environ.get("MAA5732_LOG_LEVEL", "DEBUG").upper()
 LOG_FORMAT = (
     "<green>{time:HH:mm:ss}</green> | <level>{level: <7}</level> | "
     "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - "
