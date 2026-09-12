@@ -25,9 +25,9 @@ PIPELINE_ORDER = [
     ("6", "Construction", "7"),
     ("7", "Bureau", "8"),
     ("8", "Friends", "9"),
-    ("9", "Raid", "10"),
-    ("10", "Supervision", "11"),
-    ("11", "FarmMaterial", None),
+    ("9", "FarmMaterial", "10"),
+    ("10", "Raid", "11"),
+    ("11", "Supervision", None),
 ]
 
 # 界面默认设置: [各任务开关, 各任务详细设置]
