@@ -18,6 +18,7 @@ from src.utils.material_data import (
     MAX_CANDIDATES,
     load_material_data,
     plan,
+    position_table,
     progress_key,
 )
 from src.utils.model import StopException
@@ -29,7 +30,8 @@ name = __file__.split("\\")[-1].split(".")[0]
 # 只有 OCR 认不出的图标(如次数弹窗的 +)才保留坐标, 并注明原因。
 CRISIS_MANAGE_TEXT = "危机管理"        # 主界面底部标签: 确保停在能看到进度卡的界面
 CARD_FALLBACK_TEXT = "狄斯"            # 进度卡上的地区名(关卡编号正则没匹配到时的兜底)
-STAGE_CODE_RE = r"^[A-Za-z]{0,4}N?\d+-\d+$"   # 关卡编号样式, 如 N7-1 / ReN7-2 / 13-8
+STAGE_CODE_RE = r"^[A-Za-z]{0,4}-?N?\d+-[A-Za-z]{0,2}\d+$"   # 关卡编号, 如 N7-1 / ReN7-2 / 13-8 / N3-A1
+STAGE_CODE_EXTRA_RE = r"^[A-Za-z]{1,4}-[A-Za-z]{0,2}\d+$"    # 另一套编号(单破折号): Mz-N701 / Sd-1104
 # 左侧旋盘上的"主线位置"标签(用于定位可拖动的标签)
 REGION_LABELS = ("远邦", "新城·1", "新城", "里湾", "狄斯西区", "狄斯东区")
 DIST_CITY = "狄斯城"               # 副本界面底部模式标签; 已在该页时再点无害
@@ -46,15 +48,37 @@ DIAL_DRIFT_DOWN = -0.003           # 向下拖时的 x 漂移
 DIAL_DRIFT_UP = 0.007              # 向上拖时的 x 漂移
 DIAL_FALLBACK = (0.079, 0.50)      # 找不到标签时的兜底起点
 DIAL_SETTLE = 2.5                  # 拖动后等待界面稳定
+# 旋盘方向约定(真机实测): 向上 = 更新的章节(拖到底是"远邦"一侧),
+# 向下 = 更旧的章节(拖到底是狄斯西区 01-08); 与 _detect_progress 的拖向一致。
+DIAL_UP = "up"
+DIAL_DOWN = "down"
 MAX_DIAL_DRAGS = 8                 # 每个方向最多拖几次(主线区域较多)
 MAX_DIAL_SCANS = 10                # 探测进度时最多扫几档旋盘
-MAX_LIST_SWIPES = 8               # 关卡列表最多滑动次数(单章最多 18 关)
-SWIPE_MS = 800                    # 列表滑动时长(毫秒)
+MAX_LIST_SWIPES = 8               # 关卡列表每个方向最多滑动次数(单章最多 18 关)
+SWIPE_MS = 800                    # 列表滑动时长基准(毫秒)
+# 关卡列表是一整行节点(数字小的在左, 从左到右排布), 整行可能超过一屏:
+# 因此滑动前先比较"目标 vs 屏幕上的节点"决定方向, 行程按"序号距离 × 节点间距"算。
+LIST_TRAVEL_FALLBACK = 0.2        # 量不到节点间距时的单档行程(probe 实测间距 ≈0.2)
+LIST_TRAVEL_MIN = 0.12            # 最小行程: 至少挪动一个节点
+LIST_TRAVEL_MAX = 0.5             # 单次行程上限: 拖过半个屏幕容易甩过头
+LIST_SWIPE_MS_MAX = 1600          # 长行程配更长时间, 免得被当成甩动
+LIST_ROW_Y_FALLBACK = 0.59        # 量不到节点行 y 时的兜底(probe: 关卡节点 y≈0.59)
+LIST_DRAG_MARGIN = 0.06           # 拖动起点离屏幕边缘的最小距离
+LIST_LEFT = "left"                # 目标在左: 内容右移(起点在节点簇左侧, 往右拖)
+LIST_RIGHT = "right"              # 目标在右: 内容左移(起点在节点簇右侧, 往左拖)
 # 扫荡流程按钮文本(与 Raid.py 的资源关一致)
 SWEEP_ENTRY = "连续扫荡"
 START_SWEEP = "开始扫荡"
 DONE = "完成"
 CANCEL = "取消"
+# 章节卡片上的进度文本: 「章节标题 + 同一行的 x/y」(地图卡片与二级界面右卡同款)
+PROGRESS_TEXT_RE = r"^\d+/\d+$"
+# 章节标题: N4 / 13 / OCR 只认出 "N" 的情况(注意不能匹配空文本)
+CHAPTER_TITLE_RE = r"^(N\d*|\d+)$"
+# 顶部资源条(586/2400、4/4)与左下角「任务进度 x/y」的位置范围 —— 这两处形状和
+# 章节卡片上的进度文本一模一样, 但点下去弹的是商店/任务面板(真机 probe 实测)
+SCREEN_TOP_RATIO = 0.2
+SCREEN_BOTTOM_RATIO = 0.85
 # 次数设置(弹窗「米诺斯管理系统-体力消耗」, 坐标来自探测, 与资源关同一套 UI)
 # 滑条范围 1..5, 两端为 -/+ 按钮; 次数显示在「选择次数」右侧(OCR 常合并成 选择次数3)
 SWEEP_PLUS = (0.7164, 0.6458)
@@ -180,20 +204,18 @@ class FarmMaterial(MyCustomAction):
         if detected:
             cfg.main_progress = detected
             save_confg()
-            logger.info(f"材料刷取: 探测到主线进度 {detected}")
+            logger.debug(f"材料刷取: 探测到主线进度 {detected}")
             return detected
         if cfg.main_progress:
-            logger.info(f"材料刷取: 探测失败, 使用缓存进度 {cfg.main_progress}")
+            logger.debug(f"材料刷取: 探测失败, 使用缓存进度 {cfg.main_progress}")
             return cfg.main_progress
         logger.warning("材料刷取: 探测失败且无缓存, 按默认第13章处理")
         return "13"
 
     def _detect_progress(self, clicker) -> str:
-        """探测最新主线进度
-
-        思路(用户给的, 已实测): 旋盘朝"最新"方向拖到底(=最新主线区域), 最新章节节点
+        """探测最新主线进度       
+        向上拖到底是最新区域
         旁边的「x/y」进度文本就是进度; 当前横向位置看不到时再把地图横向拖到最右。
-        方向实测: 向**上**拖到底才是最新区域(向下拖到底是最旧的狄斯西区 01-08)。
         """
         if not NAV_READY:
             return ""
@@ -203,7 +225,7 @@ class FarmMaterial(MyCustomAction):
         for _ in range(3):
             pair = self._find_progress_pair(clicker)
             if pair:
-                logger.info(f"材料刷取: 地图进度 {pair}")
+                logger.debug(f"材料刷取: 地图进度 {pair}")
                 return pair
             self._drag_map_to_end(clicker)
         logger.warning("材料刷取: 拖到底仍未找到主线进度文本")
@@ -288,7 +310,6 @@ class FarmMaterial(MyCustomAction):
 
     def _open_map(self, clicker) -> bool:
         """回到副本界面; 返回是否确认在副本界面上
-
         每轮: 已在副本界面 -> 返回; 有遮挡面板 -> 退掉;
         否则按 OCR 定位: 点「危机管理」标签确保停在卡片视图, 再点那张主线进度卡
         (卡上是"主线位置 + 关卡编号", 用编号正则/地区名定位)。
@@ -301,7 +322,7 @@ class FarmMaterial(MyCustomAction):
                     stop_sleep(1.0)
                 return True
             if any(marker in texts for marker in OVERLAY_MARKERS):
-                logger.info("材料刷取: 关闭遮挡面板")
+                logger.debug("材料刷取: 关闭遮挡面板")
                 clicker.back()
                 stop_sleep(1.2)
                 continue
@@ -320,7 +341,6 @@ class FarmMaterial(MyCustomAction):
 
     def _dial_once(self, clicker, direction="down") -> None:
         """按住左侧主线位置标签拖动一档
-
         关键(真机验证): 必须从"主线位置标签"上按住拖, 且带一点 x 漂移,
         纯竖直滑动游戏不认; duration 用毫秒。
         """
@@ -357,36 +377,76 @@ class FarmMaterial(MyCustomAction):
         gap = sorted(gaps)[len(gaps) // 2]
         return max(DIAL_TRAVEL_MIN, min(gap * DIAL_TRAVEL_RATIO, DIAL_TRAVEL_MAX))
 
+    def _chapter_key(self, text) -> tuple:
+        """章节文本 -> (系列, 章号); N 系列比数字章节新(与选关规则同一套排序)"""
+        return progress_key(str(text))[:2]
+
+    def _visible_chapters(self, clicker) -> list:
+        """地图上当前可见的章节号(如 12 / N7), 归一化为 (系列, 章号) 后排序去重
+        只取地图区域(y 中心 > 0.2)里的"纯章节号"文本, 排开顶部资源计数以及
+        「x/y」进度、「N7-1」关卡编号这类带符号的文本。
+        """
+        keys = set()
+        for text, _score, box in self._screen_items(clicker):
+            token = text.replace(" ", "")
+            if not re.match(r"^N?\d+$", token):
+                continue
+            if (box[1] + box[3] / 2) / cfg.height <= 0.2:
+                continue
+            keys.add(self._chapter_key(token))
+        return sorted(keys)
+
+    def _dial_direction(self, clicker, target, default=DIAL_UP) -> str:
+        """按"所处的主线位置"推断旋盘该向上还是向下拖
+
+         向上 = 更新的章节, 向下 = 更旧的章节(到底是最旧狄斯西区 01-08)
+        优先看地图上可见章节的区间 —— 它直接反映旋盘现在停在哪一档:
+          目标比最新可见章还新 -> 向上; 比最旧可见章还旧 -> 向下;
+          目标落在可见区间内(本该已经在屏幕上) -> 保持当前方向, 免得来回抖。
+        屏幕上一个章节号都读不到时, 用本次探测到的主线进度作参考: 目标更新 -> 向上。
+        """
+        visible = self._visible_chapters(clicker)
+        if visible:
+            if target > visible[-1]:
+                return DIAL_UP
+            if target < visible[0]:
+                return DIAL_DOWN
+            return default
+        current = self._chapter_key(getattr(self, "_progress", "") or cfg.main_progress)
+        return DIAL_UP if target > current else DIAL_DOWN
+
     def _goto_chapter(self, clicker, chapter) -> bool:
         """在地图上把目标章节滚到可见并点开(闭环: 每次拖动后重新观察)
 
-        方向先按"可见章节号 vs 目标章节号"猜一次, 猜的方向拖满后换另一个方向,
-        因此即使主线位置标签重名、顺序不确定也能收敛。
+        方向由 _dial_direction 按"所处的主线位置"推断, 每拖一次重新推断一次:
+        走过头会自动改向; 某一侧拖到头(画面不再变化)时换另一侧兜一次。
+        两个方向各 MAX_DIAL_DRAGS 次的预算, 保证一定收敛退出。
         """
         if self._click_text(clicker, chapter):
             return True
-        target = int(re.sub(r"\D", "", chapter) or 0)
-        visible = [
-            int(text) for text in self._screen_texts(clicker) if re.match(r"^\d+$", text)
-        ]
-        first = "up" if target > max(visible or [0]) else "down"
-        second = "down" if first == "up" else "up"
-        for direction in (first, second):
-            for _ in range(MAX_DIAL_DRAGS):
-                logger.info(
-                    f"材料刷取: 未见章节 {chapter}(可见 {sorted(visible)}), "
-                    f"拖旋盘向{'上' if direction == 'up' else '下'}"
-                )
-                self._dial_once(clicker, direction)
-                if self._click_text(clicker, chapter):
-                    return True
-                visible = [
-                    int(text)
-                    for text in self._screen_texts(clicker)
-                    if re.match(r"^\d+$", text)
-                ]
+        target = self._chapter_key(chapter)
+        position = getattr(self, "_progress", "") or cfg.main_progress or "未知"
+        budgets = {DIAL_UP: MAX_DIAL_DRAGS, DIAL_DOWN: MAX_DIAL_DRAGS}
+        direction = self._dial_direction(clicker, target)
+        visible = self._visible_chapters(clicker)
+        while budgets[direction] > 0:
+            logger.debug(
+                f"材料刷取: 未见章节 {chapter}(主线位置 {position}, 可见 {visible}), "
+                f"拖旋盘向{'上' if direction == DIAL_UP else '下'}"
+            )
+            self._dial_once(clicker, direction)
+            budgets[direction] -= 1
+            if self._click_text(clicker, chapter):
+                return True
+            new_visible = self._visible_chapters(clicker)
+            opposite = DIAL_DOWN if direction == DIAL_UP else DIAL_UP
+            if new_visible == visible and budgets[opposite] == MAX_DIAL_DRAGS:
+                direction = opposite      # 这一侧拖不动了, 换另一侧兜一次
+            else:
+                direction = self._dial_direction(clicker, target, default=direction)
+            visible = new_visible
         logger.warning(
-            f"材料刷取: 地图上未能找到章节 {chapter}; 当前屏幕: "
+            f"材料刷取: 地图上未能找到章节 {chapter}(主线位置 {position}); 当前屏幕: "
             + " | ".join(self._screen_texts(clicker)[:15])
         )
         return False
@@ -403,42 +463,239 @@ class FarmMaterial(MyCustomAction):
                     clicker.click_rate(x, y)
                     return True
             stop_sleep(0.6)
-        logger.warning(f"材料刷取: 屏幕上没有匹配 {pattern} 的文本")
+        # logger.warning(f"材料刷取: 屏幕上没有匹配 {pattern} 的文本")
         return False
 
-    def _enter_chapter(self, clicker, chapter) -> bool:
-        """点章节节点 -> 详情面板 -> 再点标题区的进度文本进入关卡列表
+    def _stage_code_visible(self, clicker) -> bool:
+        """屏幕上是否已经出现关卡编号(说明真的进到关卡列表了)"""
+        return any(
+            self._is_stage_code(text.replace(" ", ""))
+            for text, _score, _box in self._screen_items(clicker)
+        )
 
-        真机验证: 面板里的章节标题常被 OCR 读成 N/1/6(章号丢失), 但进度文本
-        「数字/数字」稳定可读, 点它即可进入(等价于"再点一次章节名")。
+    @staticmethod
+    def _is_stage_code(text) -> bool:
+        """屏幕文本是不是关卡节点编号(两套编号样式都认: N7-1 / N3-A1 / Mz-N701)"""
+        token = str(text).replace(" ", "")
+        return bool(re.match(STAGE_CODE_RE, token) or re.match(STAGE_CODE_EXTRA_RE, token))
+
+    def _chapter_progress_spots(self, clicker) -> list:
+        """章节卡片上的「x/y」进度文本位置, 返回比例坐标列表(可能不止一个)
+
+        只认"同一行左侧有章节标题"的进度文本: 地图上的章节卡片、二级界面右侧的
+        章节卡片都长这样(N7 + 1/6、N4 + 8/8)。
+
+        关卡列表左下角的「任务进度 6/6」和右上角资源条(586/2400、4/4)形状完全一样,
+        但左边没有章节标题 —— 点它们会弹任务面板/商店, 正是这一条把它们挡掉;
+        落在页面最下面那一条的(可能是排在下方的章节卡片)排到最后再试, 不直接丢弃。
         """
+        items = self._screen_items(clicker)
+        spots = []
+        for text, _score, box in items:
+            if not re.match(PROGRESS_TEXT_RE, text.replace(" ", "")):
+                continue
+            cy = (box[1] + box[3] / 2) / cfg.height
+            if cy <= SCREEN_TOP_RATIO:                  # 顶部资源条
+                continue
+            has_title = any(
+                re.match(CHAPTER_TITLE_RE, t.replace(" ", ""))
+                and b[0] < box[0]                       # 标题在进度文本左侧
+                and abs(b[1] - box[1]) < 40             # 同一行
+                for t, _s, b in items
+            )
+            if has_title:
+                priority = 1 if cy >= SCREEN_BOTTOM_RATIO else 0
+                spots.append((priority, (box[0] + box[2] / 2) / cfg.width, cy))
+        spots.sort(key=lambda spot: spot[0])
+        return [(x, y) for _priority, x, y in spots[:3]]
+
+    def _enter_chapter(self, clicker, chapter) -> bool:
+        """点章节节点 -> 进入该章节的关卡列表
+
+        真机: 地图上点章节卡片有时直接进关卡列表, 有时先落在二级界面; 二级界面里
+        章节标题常被 OCR 读成 N/1/6(章号丢失), 但标题旁边的「x/y」稳定可读, 点它
+        等价于"再点一次章节名"。
+
+        每一步都确认真的进了列表(屏幕上能读到关卡编号), 点错了就试下一个候选;
+        始终进不去就返回 False, 让调用方回退到下一个候选关卡, 而不是对着错误的
+        界面继续硬点。
+        """
+        if self._stage_code_visible(clicker):      # 上一步点卡片已经进了列表
+            return True
         if not self._click_text(clicker, chapter):
             return False
         stop_sleep(1.5)
-        return self._click_regex(clicker, r"^\d+/\d+$")
-
-    def _select_stage(self, clicker, stage) -> bool:
-        """在章节关卡列表里选中目标关卡(游戏内编号与 wiki 一致, 如 N7-1)
-
-        列表不可见时横向滑动: 滑动高度取当前可见关卡节点的 y(OCR 得到, 不写死)。
-        """
-        for _ in range(MAX_LIST_SWIPES + 1):
-            if self._click_text(clicker, stage["code"]):
+        if self._stage_code_visible(clicker):
+            return True
+        for x, y in self._chapter_progress_spots(clicker):
+            logger.debug(f"材料刷取: 点章节卡片的进度文本 @ ({x:.3f},{y:.3f})")
+            clicker.click_rate(x, y)
+            stop_sleep(1.5)
+            if self._stage_code_visible(clicker):
                 return True
-            row_y = None
-            for text, _score, box in self._screen_items(clicker):
-                code = text.replace(" ", "")
-                if re.match(r"^[A-Za-z]*N?\d+-\d+$", code):
-                    row_y = (box[1] + box[3] / 2) / cfg.height
-                    break
-            y = row_y if row_y else 0.59
-            clicker.swape([0.85, y, 8, 8], [0.30, y, 8, 8], SWIPE_MS)
-            stop_sleep(1.2)
         logger.warning(
-            f"材料刷取: 关卡列表里未找到 {stage['code']}; 当前屏幕: "
+            f"材料刷取: 点章节 {chapter} 后没进关卡列表; 当前屏幕: "
             + " | ".join(self._screen_texts(clicker)[:15])
         )
         return False
+
+    def _select_stage(self, clicker, stage) -> bool:
+        """在章节关卡列表里选中目标关卡(游戏内编号与 wiki 一致, 如 N7-1 / N3-A1)
+
+        关卡列表是**一整行节点**、按真机顺序从左到右排布(关号小的在左, 同号 A 组在 B 组前),
+        整行可能超过一屏, 所以不能只朝一个方向滑:
+
+          1. 用"章内位置"比较目标与屏幕上的节点, 决定往哪边滑(目标在左 -> 内容右移)
+          2. 行程 = "目标与最近节点的位置距离 × 实测节点间距", 限制在一个节点到半屏之间
+             (近的目标用小行程, 免得一下子滑过头)
+          3. 每次滑完重新观察: 目标出现就点; 某一侧画面不再变化(到底)时换另一侧兜一次
+
+        章内位置来自数据里按真机顺序排好的表(`chapter_order`); 该章不在表里时退回关号近似。
+        两个方向各有 MAX_LIST_SWIPES 的预算, 保证收敛退出。
+        """
+        code = stage["code"]
+        if self._click_text(clicker, code):
+            return True
+        chapter = stage.get("chapter") or ""
+        positions = self._chapter_positions(chapter)
+        target = self._list_pos(code, positions)
+        nodes = self._visible_stages(clicker)
+        budgets = {LIST_LEFT: MAX_LIST_SWIPES, LIST_RIGHT: MAX_LIST_SWIPES}
+        direction = self._list_direction(
+            self._node_positions(nodes, chapter, positions), target, default=LIST_RIGHT
+        )
+        while budgets[direction] > 0:
+            same = self._chapter_nodes(nodes, chapter)
+            travel = self._list_travel(
+                [self._list_pos(node, positions) for node, _x, _y in same],
+                target,
+                self._list_gap(same),
+            )
+            logger.debug(
+                f"材料刷取: 未见关卡 {code}(屏幕上的节点 "
+                f"{[node for node, _x, _y in nodes]}), 向"
+                f"{'左' if direction == LIST_LEFT else '右'}滑 {travel:.2f}"
+            )
+            self._swipe_list(clicker, nodes, direction, travel)
+            budgets[direction] -= 1
+            if self._click_text(clicker, code):
+                return True
+            new_nodes = self._visible_stages(clicker)
+            opposite = LIST_RIGHT if direction == LIST_LEFT else LIST_LEFT
+            if (
+                [node for node, _x, _y in new_nodes] == [node for node, _x, _y in nodes]
+                and budgets[opposite] == MAX_LIST_SWIPES
+            ):
+                direction = opposite          # 这一侧滑不动了, 换另一侧兜一次
+            else:
+                direction = self._list_direction(
+                    self._node_positions(new_nodes, chapter, positions), target, default=direction
+                )
+            nodes = new_nodes
+        logger.warning(
+            f"材料刷取: 关卡列表里未找到 {code}; 当前屏幕: "
+            + " | ".join(self._screen_texts(clicker)[:15])
+        )
+        return False
+
+    def _visible_stages(self, clicker) -> list:
+        """关卡列表上当前可见的节点 [(编号, x, y)], 按横坐标排序(左 -> 右)"""
+        nodes = []
+        for text, _score, box in self._screen_items(clicker):
+            code = text.replace(" ", "")
+            if not self._is_stage_code(code):
+                continue
+            nodes.append(
+                (code, (box[0] + box[2] / 2) / cfg.width, (box[1] + box[3] / 2) / cfg.height)
+            )
+        return sorted(nodes, key=lambda node: node[1])
+
+    @staticmethod
+    def _chapter_positions(chapter) -> dict:
+        """该章 {关卡编号: 章内位置(0 起)} —— 来自数据里按真机顺序排好的表"""
+        return position_table(chapter or "")
+
+    @staticmethod
+    def _list_pos(code, positions) -> int:
+        """节点在章内的位置; 表里没有这个编号时退回关号(仅兜底, 仍与位置同向)"""
+        if code in positions:
+            return positions[code]
+        return FarmMaterial._stage_num(code) or 0
+
+    def _node_positions(self, nodes, chapter, positions) -> list:
+        """屏幕上同一章节点的位置列表(排开别套编号的节点)"""
+        return [
+            self._list_pos(code, positions)
+            for code, _x, _y in self._chapter_nodes(nodes, chapter)
+        ]
+
+    @staticmethod
+    def _chapter_nodes(nodes, chapter) -> list:
+        """只留与目标同章的节点
+
+        同一行里会混进别套编号的节点(如 N7 行里的 Mz-N701 / ReN7-2), 它们的序号
+        体系不同, 参与"目标在左还是在右"的比较会得出错误方向。
+        过滤后一个都不剩时退回全部节点(宁可方向靠猜, 也不要没得比)。
+        """
+        same = [node for node in nodes if str(node[0]).rsplit("-", 1)[0] == str(chapter)]
+        return same or list(nodes)
+
+    @staticmethod
+    def _stage_num(code):
+        """关卡编号 -> 关号(N3-6 -> 6, N3-A1 -> 1); 解析不出返回 None
+
+        只在拿不到真机顺序表时用作位置的近似(关号小的在左)。
+        """
+        m = re.search(r"-([A-Za-z]{0,2})(\d+)$", str(code))
+        return int(m.group(2)) if m else None
+
+    def _list_gap(self, nodes) -> float:
+        """相邻节点的横向间距: 由 OCR 量出的横坐标差取中位数(probe 实测 ≈0.2)"""
+        xs = sorted(node[1] for node in nodes)
+        gaps = [xs[i + 1] - xs[i] for i in range(len(xs) - 1)]
+        if not gaps:
+            return LIST_TRAVEL_FALLBACK
+        return sorted(gaps)[len(gaps) // 2]
+
+    @staticmethod
+    def _list_travel(positions, target, gap) -> float:
+        """滑动行程: 目标与最近可见节点的位置距离 × 节点间距(一个节点 ~ 半屏之间)"""
+        if target is None or not positions:
+            return LIST_TRAVEL_FALLBACK
+        distance = max(1, min(abs(target - pos) for pos in positions))
+        return max(LIST_TRAVEL_MIN, min(distance * gap, LIST_TRAVEL_MAX))
+
+    @staticmethod
+    def _list_direction(positions, target, default=LIST_RIGHT) -> str:
+        """按"屏幕上的节点位置 vs 目标位置"推断往哪边滑
+
+        位置比屏幕上的都小 -> 目标在左边(内容要右移); 都大 -> 在右边;
+        落在可见区间内(本该已经看见) -> 保持当前方向, 免得来回抖。
+        """
+        if target is None or not positions:
+            return default
+        if target < min(positions):
+            return LIST_LEFT
+        if target > max(positions):
+            return LIST_RIGHT
+        return default
+
+    def _swipe_list(self, clicker, nodes, direction, travel) -> None:
+        """横向滑动关卡列表: 从节点簇外侧的空白处按下, 拖 travel 的行程"""
+        gap = self._list_gap(nodes)
+        xs = [x for _code, x, _y in nodes]
+        ys = [y for _code, _x, y in nodes]
+        y = sorted(ys)[len(ys) // 2] if ys else LIST_ROW_Y_FALLBACK
+        if direction == LIST_LEFT:            # 目标在左: 起点在节点簇左侧, 往右拖
+            begin = max(LIST_DRAG_MARGIN, min(xs) - gap / 2) if xs else LIST_DRAG_MARGIN
+            end = min(1 - LIST_DRAG_MARGIN, begin + travel)
+        else:                                 # 目标在右: 起点在节点簇右侧, 往左拖
+            begin = min(1 - LIST_DRAG_MARGIN, max(xs) + gap / 2) if xs else 1 - LIST_DRAG_MARGIN
+            end = max(LIST_DRAG_MARGIN, begin - travel)
+        # 长行程配更长时间: 手指走得慢一点, 免得游戏按甩动处理而滑过头
+        duration = min(LIST_SWIPE_MS_MAX, int(SWIPE_MS * (1 + abs(end - begin))))
+        clicker.swape([begin, y, 8, 8], [end, y, 8, 8], duration)
+        stop_sleep(1.2)
 
     def _farm_one(self, clicker, stage) -> str:
         """扫荡单个关卡; 返回 "ok" / "no_stamina" / "unavailable" """
