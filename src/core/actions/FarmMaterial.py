@@ -54,6 +54,25 @@ DIAL_UP = "up"
 DIAL_DOWN = "down"
 MAX_DIAL_DRAGS = 8                 # 每个方向最多拖几次(主线区域较多)
 MAX_DIAL_SCANS = 10                # 探测进度时最多扫几档旋盘
+# 地图(副本界面)横向: 一个区域的章节是横向一排(狄斯西区 1-8、里湾 9-13…), 一屏放不下。
+# 真机实测一个区域不超过两屏, 所以找章节时不需要算行程与方向, 滑到两端即可覆盖。
+MAP_LEFT = "left"                  # 手指向右拖(0.25 -> 0.85): 露出更旧(左)的章节
+MAP_RIGHT = "right"                # 手指向左拖(0.85 -> 0.25): 露出更新(右)的章节
+MAP_DRAG_BEGIN = 0.25
+MAP_DRAG_END = 0.85
+MAP_SCAN_STEPS = 4                 # 地图每个方向最多滑几屏
+MAP_DETECT_STEPS = 6               # 探测进度时横向滑动的预算(沿用旧实现)
+MAP_ROW_Y_FALLBACK = 0.35          # 量不到章节节点 y 时的兜底(probe: 章节节点 y≈0.35)
+# 旋盘(主线位置)覆盖的章节 —— 真机 + wiki「主线剧情」页(见 docs/nav_probe/coords.md):
+# 狄斯西区(铁血篇) 序章+1-8 / 里湾(锈火篇) 9-13 / 新城-悬城篇 N1-N8 在地图上分两屏
+# (新城·1 放 N1-N4、新城 放 N5-N8)、覆海篇 N9-N10 在 远邦。
+MAP_REGIONS = (
+    ("狄斯西区", (2, 1), (2, 8)),
+    ("里湾", (2, 9), (2, 13)),
+    ("新城·1", (3, 1), (3, 4)),
+    ("新城", (3, 5), (3, 8)),
+    ("远邦", (3, 9), (3, 10)),
+)
 MAX_LIST_SWIPES = 8               # 关卡列表每个方向最多滑动次数(单章最多 18 关)
 SWIPE_MS = 800                    # 列表滑动时长基准(毫秒)
 # 关卡列表是一整行节点(数字小的在左, 从左到右排布), 整行可能超过一屏:
@@ -223,7 +242,7 @@ class FarmMaterial(MyCustomAction):
             if pair:
                 logger.debug(f"材料刷取: 地图进度 {pair}")
                 return pair
-            self._drag_map_to_end(clicker)
+            self._drag_map_to_side(clicker, MAP_LEFT, max_steps=MAP_DETECT_STEPS)
         logger.warning("材料刷取: 拖到底仍未找到主线进度文本")
         return ""
 
@@ -237,8 +256,8 @@ class FarmMaterial(MyCustomAction):
             last = snapshot
             self._dial_once(clicker, direction)
 
-    def _drag_map_to_end(self, clicker, max_steps=6) -> None:
-        """把地图横向拖到最右: 以当前可见章节节点的 y 为高度, 每次拖一屏"""
+    def _drag_map_to_side(self, clicker, direction=MAP_LEFT, max_steps=MAP_SCAN_STEPS) -> None:
+        """把地图横向滑到某一端: 以当前可见章节节点的 y 为高度, 每次滑一屏, 画面不再变化即到底"""
         anchor = None
         for text, _score, box in self._screen_items(clicker):
             if re.match(STAGE_CODE_RE, text.replace(" ", "")) or re.match(
@@ -246,15 +265,31 @@ class FarmMaterial(MyCustomAction):
             ):
                 anchor = box
                 break
-        y = (anchor[1] + anchor[3] / 2) / cfg.height if anchor else 0.40
+        y = (anchor[1] + anchor[3] / 2) / cfg.height if anchor else MAP_ROW_Y_FALLBACK
+        if direction == MAP_LEFT:
+            begin, end = MAP_DRAG_BEGIN, MAP_DRAG_END
+        else:
+            begin, end = MAP_DRAG_END, MAP_DRAG_BEGIN
         last = None
         for _ in range(max_steps):
             snapshot = tuple(sorted(self._screen_texts(clicker)))
             if snapshot == last:
-                break
+                return
             last = snapshot
-            clicker.swape([0.25, y, 8, 8], [0.85, y, 8, 8], SWIPE_MS)
+            clicker.swape([begin, y, 8, 8], [end, y, 8, 8], SWIPE_MS)
             stop_sleep(1.5)
+
+    def _map_find_chapter(self, clicker, chapter) -> bool:
+        """在当前区域的地图里横向找目标章节: 先滑到一端找, 找不到再滑到另一端找
+
+        章节是横向一排且可能超过一屏, 滑到两端即可覆盖(区域不超过两屏, 真机实测),
+        所以这里不做方向/行程推算 —— 这正是"不在屏幕里就找不到"的修法。
+        """
+        for direction in (MAP_LEFT, MAP_RIGHT):
+            self._drag_map_to_side(clicker, direction)
+            if self._click_text(clicker, chapter):
+                return True
+        return False
 
     def _find_progress_pair(self, clicker) -> str:
         """在地图区域(y>0.2)里找「章节文本 + x/y 进度」这一对, 返回如 N7-1/6"""
@@ -392,15 +427,40 @@ class FarmMaterial(MyCustomAction):
             keys.add(self._chapter_key(token))
         return sorted(keys)
 
-    def _dial_direction(self, clicker, target, default=DIAL_UP) -> str:
-        """按"所处的主线位置"推断旋盘该向上还是向下拖
+    @staticmethod
+    def _region_index(chapter_key) -> int:
+        """章节键 -> 主线位置(区域)在 MAP_REGIONS 里的序号; 不在表里返回 -1"""
+        if not chapter_key:
+            return -1
+        for index, (_name, low, high) in enumerate(MAP_REGIONS):
+            if low <= tuple(chapter_key) <= high:
+                return index
+        return -1
 
-         向上 = 更新的章节, 向下 = 更旧的章节(到底是最旧狄斯西区 01-08)
-        优先看地图上可见章节的区间 —— 它直接反映旋盘现在停在哪一档:
-          目标比最新可见章还新 -> 向上; 比最旧可见章还旧 -> 向下;
-          目标落在可见区间内(本该已经在屏幕上) -> 保持当前方向, 免得来回抖。
-        屏幕上一个章节号都读不到时, 用本次探测到的主线进度作参考: 目标更新 -> 向上。
+    def _current_region(self, clicker) -> int:
+        """当前所处的主线位置(区域序号): 先看地图上可见的章节, 读不到再用本次探测的进度"""
+        visible = self._visible_chapters(clicker)
+        if visible:
+            return self._region_index(visible[0])
+        return self._region_index(
+            self._chapter_key(getattr(self, "_progress", "") or cfg.main_progress)
+        )
+
+    def _dial_direction(self, clicker, target, default=DIAL_UP) -> str:
+        """推断旋盘该向上还是向下拖; **目标已经在当前区域时返回 ""(不要拖旋盘)**
+
+        区域表(MAP_REGIONS)把章节号换算成主线位置:
+          - 目标与当前区域相同 -> "" —— 地图上横向滑就能找到, 拖旋盘反而会跑出这个区域
+            (真机踩过: 目标是 N8、屏幕上只有 N5 时, 旧逻辑会往上拖, 其实该把地图往右滑)
+          - 区域不同 -> 区域序号大的方向(向上 = 更新的章节, 向下 = 更旧的)
+        区域信息拿不到时(章节不在表里、屏幕上一个章节号也没有)退回可见章节区间比较。
         """
+        target_region = self._region_index(target)
+        current_region = self._current_region(clicker)
+        if target_region >= 0 and current_region >= 0:
+            if target_region == current_region:
+                return ""
+            return DIAL_UP if target_region > current_region else DIAL_DOWN
         visible = self._visible_chapters(clicker)
         if visible:
             if target > visible[-1]:
@@ -414,9 +474,10 @@ class FarmMaterial(MyCustomAction):
     def _goto_chapter(self, clicker, chapter) -> bool:
         """在地图上把目标章节滚到可见并点开(闭环: 每次拖动后重新观察)
 
-        方向由 _dial_direction 按"所处的主线位置"推断, 每拖一次重新推断一次:
-        走过头会自动改向; 某一侧拖到头(画面不再变化)时换另一侧兜一次。
-        两个方向各 MAX_DIAL_DRAGS 次的预算, 保证一定收敛退出。
+        一个区域的章节在地图上是横向一排且可能超过一屏, 所以顺序是:
+          1. 目标已经在当前区域 -> 只在地图里横向找(滑到两端), 找不到就判失败, 不再瞎拖旋盘
+          2. 目标在别的区域 -> 按区域表拖旋盘换区域, 换完回到第 1 步
+        某一侧旋盘拖不动(画面不再变化)时换另一侧兜一次; 两个方向各有预算, 保证收敛退出。
         """
         if self._click_text(clicker, chapter):
             return True
@@ -425,7 +486,15 @@ class FarmMaterial(MyCustomAction):
         budgets = {DIAL_UP: MAX_DIAL_DRAGS, DIAL_DOWN: MAX_DIAL_DRAGS}
         direction = self._dial_direction(clicker, target)
         visible = self._visible_chapters(clicker)
-        while budgets[direction] > 0:
+        scanned = False
+        while True:
+            if not direction:                     # 已在目标区域: 只横向找
+                if self._map_find_chapter(clicker, chapter):
+                    return True
+                scanned = True
+                break
+            if budgets[direction] <= 0:
+                break
             logger.debug(
                 f"材料刷取: 未见章节 {chapter}(主线位置 {position}, 可见 {visible}), "
                 f"拖旋盘向{'上' if direction == DIAL_UP else '下'}"
@@ -437,10 +506,12 @@ class FarmMaterial(MyCustomAction):
             new_visible = self._visible_chapters(clicker)
             opposite = DIAL_DOWN if direction == DIAL_UP else DIAL_UP
             if new_visible == visible and budgets[opposite] == MAX_DIAL_DRAGS:
-                direction = opposite      # 这一侧拖不动了, 换另一侧兜一次
+                direction = opposite              # 这一侧拖不动了, 换另一侧兜一次
             else:
                 direction = self._dial_direction(clicker, target, default=direction)
             visible = new_visible
+        if not scanned and self._map_find_chapter(clicker, chapter):   # 换完区域再横向找一遍
+            return True
         logger.warning(
             f"材料刷取: 地图上未能找到章节 {chapter}(主线位置 {position}); 当前屏幕: "
             + " | ".join(self._screen_texts(clicker)[:15])
