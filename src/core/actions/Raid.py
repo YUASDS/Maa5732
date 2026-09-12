@@ -19,13 +19,15 @@ SWEEP_COUNT_ROI = [0.25, 0.588, 0.1, 0.04]
 
 SOURCE_ITEMS = ("异能源质", "诡秘源质", "坚韧源质", "狂暴源质", "精准源质", "启迪源质")
 
+# 键名与界面 Raid_* 控件保持一致,作为界面参数缺失时的兜底
 default_cfg = {
-    "RaidRiver": True,
-    "RaidDark": True,
+    "RaidRivercheckBox": True,
+    "RaidDarkcheckBox": True,
+    "RaidFightcheckBox": False,
+    "ActivityRaidcheckBox": False,
     "ResourceCombo": "狄斯币",
     "ResourceLevelCombo": "4",
     "StromLevelCombo": "5",
-    "ActivityRaidcheckBox": False,
 }
 
 action_dict = {}
@@ -66,25 +68,43 @@ class Raid(MyCustomAction):
         :return: 是否执行成功。
         """
         logger.info(f"副本 开始")
-        action_param = json.loads(argv.custom_action_param)
-        run_param = default_cfg.copy()
-        if action_param != {}:
-            run_param = action_param
-            self.run_param = run_param
+        self.run_param = self._load_param(argv.custom_action_param)
+        run_param = self.run_param
         clicker = Click(context)
         # 点击危机管理
         self.clicker = clicker
         clicker.click_rate(0.74, 0.89)
         if run_param.get("ActivityRaidcheckBox"):
             self.ActivityRaid()
-        elif run_param["RaidRivercheckBox"]:
+        elif run_param.get("RaidRivercheckBox"):
             self.RaidRiver()
-        if run_param["RaidDarkcheckBox"]:
+        if run_param.get("RaidDarkcheckBox"):
             self.RaidDark()
-        if run_param["RaidFightcheckBox"]:
+        if run_param.get("RaidFightcheckBox"):
             self.RaidFight()
         logger.info(f"副本 完成")
         return True
+
+    def _load_param(self, raw) -> dict:
+        """解析界面参数并与默认值合并,缺失字段回退默认值"""
+        return {**default_cfg, **self._to_dict(raw)}
+
+    @staticmethod
+    def _to_dict(raw) -> dict:
+        """把参数转换为dict,兼容框架传入的JSON字符串或已解析的对象"""
+        value = raw
+        for _ in range(3):
+            if isinstance(value, dict):
+                return value
+            if not isinstance(value, str) or not value:
+                break
+            try:
+                value = json.loads(value)
+            except ValueError:
+                break
+        if raw not in (None, ""):
+            logger.warning(f"副本参数无法解析,使用默认参数: {raw!r}")
+        return {}
 
     def RaidDark(self):
         clicker = self.clicker
