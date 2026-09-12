@@ -185,3 +185,4 @@ cython_debug/
 
 # 导航探测截图(工作产物, 不入库; OCR 文本与坐标表保留)
 docs/nav_probe/*.png
+docs/

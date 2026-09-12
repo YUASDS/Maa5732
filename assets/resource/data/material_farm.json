@@ -1,5 +1,5 @@
 {
- "generated_from": "docs/wiki/*.json",
+ "generated_from": "assets/config/wiki/*.json",
  "chapters": {
   "主线N": [
    1,
