@@ -7,7 +7,7 @@ from src.core.actions import *
 from src.core.TaskerManager import TASKER_MANAGER
 from src.utils.parse import json2pipline
 from src.utils.click import STOP
-from src.utils.model import StopException
+from src.utils.model import StopException, DeviceNotFoundError
 
 # 单个任务的执行超时(1小时),超过视为失败,保证线程不永久悬挂
 TASK_TIMEOUT = 3600
@@ -47,6 +47,9 @@ class TaskerThread(threading.Thread):
                 completed = job.succeeded
             except StopException:
                 logger.warning("任务已取消")
+                initialized = False
+            except DeviceNotFoundError as e:
+                logger.error(f"{e}")
                 initialized = False
             except Exception as e:
                 logger.exception(e)
