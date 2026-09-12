@@ -16,68 +16,18 @@ scrn_dir = os.path.join(BASE_DIR, "screenshot.png")  # 截图后用于识别
 ## 当前日期
 formatted_today = time.strftime("%Y-%m-%d", time.localtime(time.time()))
 
-base_template = """{
-            "0": {
-                "action": "custom",
-                "custom_action": "Nothing"
-            },
-            "1": {
-                "action": "custom",
-                "custom_action": "StartToHomeAction",
-                "custom_action_param": "StartToHomeActionCustom",
-                "next": "3"
-            },
-            "2": {
-                "action": "custom",
-                "custom_action": "Nothing",
-                "next": "3"
-            },
-            "3": {
-                "action": "custom",
-                "custom_action": "Guild",
-                "custom_action_param": "GuildCustom",
-                "next": "4"
-            },
-            "4": {
-                "action": "custom",
-                "custom_action": "GetMail",
-                "next": "5"
-            },
-            "5": {
-                "action": "custom",
-                "custom_action": "Purchase",
-                "custom_action_param": "PurchaseCustom",
-                "next": "6"
-            },
-            "6": {
-                "action": "custom",
-                "custom_action": "Construction",
-                "custom_action_param": "ConstructionCustom",
-                "next": "7"
-            },
-            "7": {
-                "action": "custom",
-                "custom_action": "Bureau",
-                "next": "8"
-            },
-            "8": {
-                "action": "custom",
-                "custom_action": "Friends",
-                "custom_action_param": "FriendsCustom",
-                "next": "9"
-            },
-            "9": {
-                "action": "custom",
-                "custom_action": "Raid",
-                "custom_action_param": "RaidCustom",
-                "next": "10"
-            },
-            "10": {
-                "action": "custom",
-                "custom_action": "Supervision",
-                "custom_action_param": "SupervisionCustom"
-            }
-        }"""
+# 任务流水线: (节点ID, 动作名, 下一节点ID),入口固定为节点"1"
+PIPELINE_ORDER = [
+    ("1", "StartToHomeAction", "3"),
+    ("3", "Guild", "4"),
+    ("4", "GetMail", "5"),
+    ("5", "Purchase", "6"),
+    ("6", "Construction", "7"),
+    ("7", "Bureau", "8"),
+    ("8", "Friends", "9"),
+    ("9", "Raid", "10"),
+    ("10", "Supervision", None),
+]
 
 # 界面默认设置: [各任务开关, 各任务详细设置]
 DEFAULT_SETTINGS = [
