@@ -62,6 +62,10 @@ MAP_DRAG_BEGIN = 0.25
 MAP_DRAG_END = 0.85
 MAP_SCAN_STEPS = 4                 # 地图每个方向最多滑几屏
 MAP_DETECT_STEPS = 6               # 探测进度时横向滑动的预算(沿用旧实现)
+# 横向滑动必须带一点 y 偏移: 纯水平滑动游戏不认(真机实测, 与旋盘必须带 x 漂移同理)。
+# 地图与关卡列表各留一个常量便于分别微调, 滑不动时先试改符号/大小(0.006 ≈ 4px)。
+MAP_DRAG_DRIFT = -0.006
+LIST_DRAG_DRIFT = -0.006
 MAP_ROW_Y_FALLBACK = 0.35          # 量不到章节节点 y 时的兜底(probe: 章节节点 y≈0.35)
 # 旋盘(主线位置)覆盖的章节 —— 真机 + wiki「主线剧情」页(见 docs/nav_probe/coords.md):
 # 狄斯西区(铁血篇) 序章+1-8 / 里湾(锈火篇) 9-13 / 新城-悬城篇 N1-N8 在地图上分两屏
@@ -276,7 +280,7 @@ class FarmMaterial(MyCustomAction):
             if snapshot == last:
                 return
             last = snapshot
-            clicker.swape([begin, y, 8, 8], [end, y, 8, 8], SWIPE_MS)
+            clicker.swape([begin, y, 8, 8], [end, y + MAP_DRAG_DRIFT, 8, 8], SWIPE_MS)
             stop_sleep(1.5)
 
     def _map_find_chapter(self, clicker, chapter) -> bool:
@@ -748,7 +752,7 @@ class FarmMaterial(MyCustomAction):
         return default
 
     def _swipe_list(self, clicker, nodes, direction, travel) -> None:
-        """横向滑动关卡列表: 从节点簇外侧的空白处按下, 拖 travel 的行程"""
+        """横向滑动关卡列表: 从节点簇外侧的空白处按下, 拖 travel 的行程(带 y 偏移)"""
         gap = self._list_gap(nodes)
         xs = [x for _code, x, _y in nodes]
         ys = [y for _code, _x, y in nodes]
@@ -761,7 +765,7 @@ class FarmMaterial(MyCustomAction):
             end = max(LIST_DRAG_MARGIN, begin - travel)
         # 长行程配更长时间: 手指走得慢一点, 免得游戏按甩动处理而滑过头
         duration = min(LIST_SWIPE_MS_MAX, int(SWIPE_MS * (1 + abs(end - begin))))
-        clicker.swape([begin, y, 8, 8], [end, y, 8, 8], duration)
+        clicker.swape([begin, y, 8, 8], [end, y + LIST_DRAG_DRIFT, 8, 8], duration)
         stop_sleep(1.2)
 
     def _farm_one(self, clicker, stage) -> str:
