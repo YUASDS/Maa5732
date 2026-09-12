@@ -1,6 +1,4 @@
-import json
-
-from src.utils.configs import base_template
+from src.utils.configs import PIPELINE_ORDER
 
 
 def parse_screencap_methods(methods):
@@ -25,17 +23,25 @@ def parse_input_methods(methods):
     return "\n".join(available_methods) if available_methods else "无可用输入方法"
 
 
-def json2pipline(data: list[dict]):
-    this_strings = base_template
-    for key, value in data[0].items():
-        if not value:
-            # 将关闭的动作替换为什么都不做
-            this_strings = this_strings.replace(key, "Nothing")
-        if value and key in data[1]:
-            # 将占位的配置替换为实际的配置
-            this_strings = this_strings.replace(f'"{key}Custom"', str(data[1][key]))
-    # 转换为json字符串
-    this_strings = (
-        this_strings.replace("'", '"').replace("True", "true").replace("False", "false")
-    )
-    return json.loads(this_strings)
+def json2pipline(data: list[dict]) -> dict:
+    """把界面状态转换为MaaFramework流水线
+
+    data[0] 为各任务开关,data[1] 为各任务的详细设置。
+    未勾选的任务替换为 Nothing;详细设置作为 custom_action_param 的
+    JSON对象直接写入(与框架的 json::value 参数一致,动作侧自行解析)。
+    """
+    toggles = data[0] if data else {}
+    details = data[1] if len(data) > 1 else {}
+    pipeline = {}
+    for node_id, action, next_node in PIPELINE_ORDER:
+        if toggles.get(action):
+            node = {"action": "custom", "custom_action": action}
+            param = details.get(action)
+            if isinstance(param, dict):
+                node["custom_action_param"] = dict(param)
+        else:
+            node = {"action": "custom", "custom_action": "Nothing"}
+        if next_node is not None:
+            node["next"] = next_node
+        pipeline[node_id] = node
+    return pipeline

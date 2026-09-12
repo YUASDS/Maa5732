@@ -2,6 +2,8 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QHBoxLayout, QLabel, QPushButton, QWidget
 
+from src.utils.paths import asset_path
+
 
 class TitleBar(QWidget):
     def __init__(self, parent=None):
@@ -16,7 +18,7 @@ class TitleBar(QWidget):
 
         self.icon_label = QLabel(self)
         icon = QIcon()
-        icon.addFile("assets/resource/image/logo.ico")
+        icon.addFile(asset_path("resource", "image", "logo.ico"))
         self.icon_label.setPixmap(icon.pixmap(20, 20))
         layout.addWidget(self.icon_label)
 

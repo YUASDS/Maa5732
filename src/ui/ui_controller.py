@@ -3,13 +3,14 @@ import os
 import sys
 import re
 import html
+import shutil
 import threading
 import subprocess
 from functools import partial
 from typing import Union
 from loguru import logger
-from PySide6.QtCore import QObject, Signal, QTimer, QUrl, Qt
-from PySide6.QtGui import QDesktopServices
+from PySide6.QtCore import QObject, QSize, Signal, QTimer, QUrl, Qt
+from PySide6.QtGui import QDesktopServices, QIcon
 from PySide6.QtWidgets import (
     QApplication,
     QWidget,
@@ -28,6 +29,7 @@ from src.ui.theme import apply_theme
 from src.ui.title_bar import TitleBar
 from src.ui.update_dialog import UpdateDialog
 from src.utils.configs import cfg, save_confg
+from src.utils.paths import asset_path
 from src.utils.updater import (
     check_update,
     is_newer,
@@ -36,20 +38,40 @@ from src.utils.updater import (
     verify_sha256,
     extract_zip,
 )
-from src.utils.adb import close_emulator
+from src.utils.adb import close_emulator, emulator_alias_port, same_device
 from src.utils.click import start_by_exe
 from src.core import version
 from src.core.ThreadManager import TaskerThread
-from src.core.TaskerManager import list_adb_devices
+from src.core.TaskerManager import TASKER_MANAGER, list_adb_devices
+from src.utils.material_data import load_material_data
+
+
+# 中间栏下拉框最大宽度: 中间栏本身较窄,控件不再按整栏宽度拉伸
+SETTING_COMBO_MAX_WIDTH = 200
+# 设置页按钮最大宽度: 避免宽窗口下被拉成整行
+SETTING_BUTTON_MAX_WIDTH = 110
+# 运行中实时截图的刷新间隔(毫秒)
+SNAPSHOT_INTERVAL_MS = 1000
+
+
+def align_left(widget: QWidget):
+    """把控件在其父布局里改为左对齐(限宽后默认会居中或贴右)"""
+    parent = widget.parentWidget()
+    layout = parent.layout() if parent is not None else None
+    if layout is not None:
+        layout.setAlignment(widget, Qt.AlignmentFlag.AlignLeft)
 
 
 class MySignal(QObject):
     button = Signal(QPushButton, str)
     finish = Signal(str)
+    error = Signal(str)
     update = Signal(object, object, object, bool)
     devices = Signal(list, list)
     download_progress = Signal(int, int)
     download_done = Signal(bool, str, str)
+    snapshot = Signal(object)
+    running = Signal(bool)
 
 
 class LogSignals(QObject):
@@ -90,9 +112,21 @@ class MyWidget(QWidget):
         self.signal.devices.connect(self.handle_devices)
         self.signal.download_progress.connect(self.handle_download_progress)
         self.signal.download_done.connect(self.handle_download_done)
+        self.signal.error.connect(self.handle_error)
+        self.signal.snapshot.connect(self.show_snapshot)
+        # 截图开关只能由界面线程动 QTimer, 所以经信号从工作线程切回来
+        self.signal.running.connect(self.handle_running)
+        self._snapshot_busy = False
+        self.snapshot_timer = QTimer(self)
+        self.snapshot_timer.setInterval(SNAPSHOT_INTERVAL_MS)
+        self.snapshot_timer.timeout.connect(self.request_snapshot)
+        # 设备等待失败等异常由 TaskerManager 回调,再经信号切回界面线程
+        TASKER_MANAGER.error_callback = self.notify_error
 
         self.ui = Ui_Form()
         self.ui.setupUi(self)
+        # ui.py 由 Designer 生成,图标路径依赖工作目录,这里用绝对路径重新设置
+        self.setWindowIcon(QIcon(asset_path("resource", "image", "logo.ico")))
         self.title_bar = TitleBar(self)
         self.ui.verticalLayout_3.insertWidget(0, self.title_bar)
         self.setup_tray()
@@ -107,6 +141,7 @@ class MyWidget(QWidget):
         self.setup_logger()
         # 为按钮添加点击事件 用于切换界面
         self.widget_button.append(self.ui.GuildButton)
+        self.widget_button.append(self.ui.FarmMaterialButton)
         self.widget_button.append(self.ui.RaidButton)
         self.widget_button.append(self.ui.StartButton)
         self.widget_button.append(self.ui.FriendsButton)
@@ -115,12 +150,16 @@ class MyWidget(QWidget):
 
         for button in self.widget_button:
             button.clicked.connect(self.buttonClick)
+            # 统一为方形图标按钮,避免左栏收窄后被拉伸成各不相同的宽度
+            button.setFixedSize(28, 28)
         self.ui.LinkStartButton.clicked.connect(self.start)
         self.ui.SlectAllButton.clicked.connect(self.select_all)
         self.ui.ClearAllButton.clicked.connect(self.clear_all)
         # nothing 不进行注册
         # 对于checkBox进行注册 用于是否进行该项任务
+        # 顺序与左侧任务列表一致,也与 PIPELINE_ORDER 的执行顺序一致
         self.add_check_box(self.ui.GuildcheckBox)
+        self.add_check_box(self.ui.FarmMaterialcheckBox)
         self.add_check_box(self.ui.RaidcheckBox)
         self.add_check_box(self.ui.StartToHomeActioncheckBox)
         self.add_check_box(self.ui.FriendscheckBox)
@@ -148,7 +187,18 @@ class MyWidget(QWidget):
         self.add_detail_box(self.ui.Supervision_RewardCombo)
         self.add_detail_box(self.ui.StartToHomeAction_ServerCheckcomboBox)
         self.add_detail_box(self.ui.StartToHomeAction_StartAPPcheckBox)
+        # 材料刷取: 12 个材料 + 3 个下拉
+        self.material_data = load_material_data()
+        for mat in self.material_data["materials"]:
+            box = getattr(self.ui, f"FarmMaterial_{mat}checkBox")
+            box.setIcon(QIcon(asset_path("resource", "image", "material", f"{mat}.png")))
+            box.setIconSize(QSize(24, 24))
+            self.add_detail_box(box)
+        self.add_detail_box(self.ui.FarmMaterial_SweepCountCombo)
+        self.add_detail_box(self.ui.FarmMaterial_ProgressModeCombo)
+        self.add_detail_box(self.ui.FarmMaterial_ProgressCombo)
         self.init_combo()
+        self.compact_widths()
         self.load_from_json(cfg.settings)
         self.init_settings()
 
@@ -192,6 +242,22 @@ class MyWidget(QWidget):
             self.detail_dict[action_name] = {}
         self.detail_dict[action_name][action_setting] = obj
 
+    def compact_widths(self):
+        """收窄"任务设置"栏里的控件,避免被拉伸到整栏宽度
+
+        中间栏比左右两栏窄(见 maa-5732.ui 中 SettingBox 的宽度约束)。
+        若下拉框仍按整栏宽度拉伸,"13"这类短选项会被拉成几百像素宽,既难看
+        也浪费横向空间;这里统一限宽并左对齐,让内容靠左成列。
+        """
+        combos = list(self.ui.SettingBox.findChildren(QComboBox))
+        combos.append(self.ui.AfterFinishCombo)
+        for combo in combos:
+            combo.setMaximumWidth(SETTING_COMBO_MAX_WIDTH)
+            align_left(combo)
+        # 设置页两个按钮限宽后由布局里的弹簧顶住,不会再被拉成整行
+        for button in (self.ui.CheckUpdateButton, self.ui.BrowseButton):
+            button.setMaximumWidth(SETTING_BUTTON_MAX_WIDTH)
+
     def init_combo(self):
         # 为下拉框添加选项
         self.ui.StartToHomeAction_ServerCheckcomboBox.addItems(["B服", "官服"])
@@ -213,6 +279,13 @@ class MyWidget(QWidget):
         self.ui.Raid_ResourceLevelCombo.addItems(["1", "2", "3", "4", "5"])
         self.ui.Raid_StromLevelCombo.addItems(["1", "2", "3", "4", "5"])
         self.ui.Supervision_RewardCombo.addItems(["体力", "监察徽印"])
+        # 材料刷取
+        self.ui.FarmMaterial_SweepCountCombo.addItems([str(i) for i in range(1, 21)])  # 实际能加到多少由弹窗按体力决定
+        self.ui.FarmMaterial_ProgressModeCombo.addItems(["自动", "手动"])
+        for chap in self.material_data["chapters"]["主线"]:
+            self.ui.FarmMaterial_ProgressCombo.addItem(str(chap))
+        for chap in self.material_data["chapters"]["主线N"]:
+            self.ui.FarmMaterial_ProgressCombo.addItem(f"N{chap}")
 
     def checkBox(self):
         box = self.sender()
@@ -242,6 +315,8 @@ class MyWidget(QWidget):
             self.ui.stackedWidget.setCurrentWidget(self.ui.Purchase)
         if btnName == "SupervisionButton":
             self.ui.stackedWidget.setCurrentWidget(self.ui.Supervision)
+        if btnName == "FarmMaterialButton":
+            self.ui.stackedWidget.setCurrentWidget(self.ui.RestPage_1)
         if btnName == "SlectAllButton":
             self.ui.stackedWidget.setCurrentWidget(self.ui.Supervision)
         if btnName == "ClearAllButton":
@@ -262,6 +337,44 @@ class MyWidget(QWidget):
             self.state = 0
         self.ui.LinkStartButton.style().unpolish(self.ui.LinkStartButton)
         self.ui.LinkStartButton.style().polish(self.ui.LinkStartButton)
+        # change_running_state 可能由工作线程调用, 这里只发信号, 定时器交给界面线程
+        self.signal.running.emit(self.state == 1)
+
+    def handle_running(self, running: bool):
+        """跟随任务状态开关实时截图"""
+        if running:
+            self.request_snapshot()
+            self.snapshot_timer.start()
+        else:
+            self.snapshot_timer.stop()
+
+    def request_snapshot(self):
+        """抓一帧最新画面
+
+        截图是阻塞调用, 放到工作线程里做; 上一帧还没回来、或者设备还没初始化
+        (TASKER_MANAGER.controller 尚未建立)时直接跳过。
+        MaaFramework 的控制器用 post_* 投递任务、内部自己排队, 因此和流水线
+        同时截图是安全的。
+        """
+        if self._snapshot_busy:
+            return
+        if getattr(TASKER_MANAGER, "controller", None) is None:
+            return
+        self._snapshot_busy = True
+        threading.Thread(target=self._snapshot_worker, daemon=True).start()
+
+    def _snapshot_worker(self):
+        try:
+            frame = TASKER_MANAGER.controller.post_screencap().wait().get()
+            self.signal.snapshot.emit(frame)
+        except Exception as e:
+            logger.debug(f"实时截图失败: {e}")
+        finally:
+            self._snapshot_busy = False
+
+    def show_snapshot(self, frame):
+        """把最新截图显示在运行状态栏(界面线程)"""
+        self.ui.SnapshotLabel.set_frame(frame)
 
     def start(self):
         if self.state == 1 and not self.tasker_thread.is_busy():
@@ -396,6 +509,18 @@ class MyWidget(QWidget):
             pass
         return address
 
+    def notify_error(self, message: str):
+        """由工作线程调用,经信号切回界面线程提示用户"""
+        self.signal.error.emit(message)
+
+    def handle_error(self, message: str):
+        self.ui.TaskStatusLabel.setText("设备连接失败")
+        logger.error(message)
+        if QSystemTrayIcon.isSystemTrayAvailable():
+            self.tray.showMessage(
+                "MAA5732", message, QSystemTrayIcon.MessageIcon.Critical, 10000
+            )
+
     def handle_devices(self, names: list, addresses: list):
         combo = self.ui.DeviceCombo
         combo.blockSignals(True)
@@ -405,11 +530,20 @@ class MyWidget(QWidget):
             combo.addItem(text, address)
         if cfg.adb_address:
             index = combo.findData(cfg.adb_address)
+            if index < 0:
+                # findData 只做字符串比较,按别名等价(emulator-<n> / 127.0.0.1:<n+1>)再找一次
+                for i in range(combo.count()):
+                    if same_device(combo.itemData(i) or "", cfg.adb_address):
+                        index = i
+                        break
             if index >= 0:
                 combo.setCurrentIndex(index)
-            elif not self._is_alias(cfg.adb_address, addresses):
-                combo.addItem(cfg.adb_address, cfg.adb_address)
-                combo.setCurrentIndex(combo.count() - 1)
+            else:
+                # 不再把不可用地址塞进下拉框,避免被误选后写入配置
+                combo.setCurrentIndex(-1)
+                logger.warning(
+                    f"配置的ADB设备 {cfg.adb_address} 当前不可用,运行时将尝试重新连接"
+                )
         elif combo.count() > 0:
             combo.setCurrentIndex(0)
             cfg.adb_address = combo.currentData() or ""
@@ -420,13 +554,8 @@ class MyWidget(QWidget):
 
     def _is_alias(self, address, connected):
         """判断emulator-*地址是否为已连接端口的别名"""
-        if not address.startswith("emulator-"):
-            return False
-        try:
-            port = int(address[len("emulator-"):])
-        except ValueError:
-            return False
-        return f"127.0.0.1:{port + 1}" in connected
+        port = emulator_alias_port(address)
+        return port is not None and f"127.0.0.1:{port}" in connected
 
     def save_device(self):
         cfg.adb_address = self.ui.DeviceCombo.currentData() or ""

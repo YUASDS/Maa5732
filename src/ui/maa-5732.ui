@@ -29,11 +29,23 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_8" stretch="1,1,1">
+        <layout class="QHBoxLayout" name="horizontalLayout_8" stretch="0,2,3">
          <item>
           <widget class="QGroupBox" name="SelectBox">
+           <property name="minimumSize">
+            <size>
+             <width>190</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>230</width>
+             <height>16777215</height>
+            </size>
+           </property>
            <property name="title">
-            <string/>
+            <string>任务</string>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout">
             <item>
@@ -181,6 +193,27 @@
              </layout>
             </item>
             <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_farm">
+              <item>
+               <widget class="QCheckBox" name="FarmMaterialcheckBox">
+                <property name="text">
+                 <string>材料刷取</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="FarmMaterialButton">
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="icon">
+                 <iconset theme="QIcon::ThemeIcon::DocumentProperties"/>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
              <layout class="QHBoxLayout" name="horizontalLayout_9">
               <item>
                <widget class="QCheckBox" name="RaidcheckBox">
@@ -251,10 +284,37 @@
          </item>
          <item>
           <widget class="QGroupBox" name="SettingBox">
+           <property name="minimumSize">
+            <size>
+             <width>245</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>300</width>
+             <height>16777215</height>
+            </size>
+           </property>
            <property name="title">
-            <string/>
+            <string>任务设置</string>
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout_14">
+            <property name="spacing">
+             <number>6</number>
+            </property>
+            <property name="leftMargin">
+             <number>6</number>
+            </property>
+            <property name="topMargin">
+             <number>6</number>
+            </property>
+            <property name="rightMargin">
+             <number>6</number>
+            </property>
+            <property name="bottomMargin">
+             <number>6</number>
+            </property>
             <item>
              <widget class="QStackedWidget" name="stackedWidget">
               <property name="cursor">
@@ -437,7 +497,199 @@
                </layout>
               </widget>
               <widget class="QWidget" name="RestPage_2"/>
-              <widget class="QWidget" name="RestPage_1"/>
+              <widget class="QWidget" name="RestPage_1">
+               <layout class="QVBoxLayout" name="verticalLayout_farm">
+                <property name="spacing">
+                 <number>6</number>
+                </property>
+                <property name="leftMargin">
+                 <number>2</number>
+                </property>
+                <property name="topMargin">
+                 <number>2</number>
+                </property>
+                <property name="rightMargin">
+                 <number>2</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>2</number>
+                </property>
+                <item>
+                 <layout class="QVBoxLayout" name="verticalLayout_farm_top">
+                  <item>
+                   <layout class="QHBoxLayout" name="horizontalLayout_farm_progress">
+                    <item>
+                     <widget class="QLabel" name="FarmMaterial_ProgressLabel">
+                      <property name="text">
+                       <string>主线进度</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QComboBox" name="FarmMaterial_ProgressModeCombo"/>
+                    </item>
+                    <item>
+                     <widget class="QComboBox" name="FarmMaterial_ProgressCombo"/>
+                    </item>
+                    <item>
+                     <spacer name="horizontalSpacer_farm_progress">
+                      <property name="orientation">
+                       <enum>Qt::Orientation::Horizontal</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>20</width>
+                        <height>20</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                   </layout>
+                  </item>
+                  <item>
+                   <layout class="QHBoxLayout" name="horizontalLayout_farm_sweep">
+                    <item>
+                     <widget class="QLabel" name="FarmMaterial_SweepCountLabel">
+                      <property name="text">
+                       <string>每关扫荡次数</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QComboBox" name="FarmMaterial_SweepCountCombo"/>
+                    </item>
+                    <item>
+                     <spacer name="horizontalSpacer_farm_sweep">
+                      <property name="orientation">
+                       <enum>Qt::Orientation::Horizontal</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>20</width>
+                        <height>20</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                   </layout>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <widget class="QScrollArea" name="FarmMaterial_ScrollArea">
+                  <property name="widgetResizable">
+                   <bool>true</bool>
+                  </property>
+                  <widget class="QWidget" name="FarmMaterial_ScrollContents">
+                   <layout class="QGridLayout" name="FarmMaterial_Grid">
+                    <property name="leftMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="horizontalSpacing">
+                     <number>4</number>
+                    </property>
+                    <property name="verticalSpacing">
+                     <number>4</number>
+                    </property>
+                    <item row="0" column="0">
+                     <widget class="QCheckBox" name="FarmMaterial_裂生冰晶锥checkBox">
+                      <property name="text">
+                       <string>裂生冰晶锥</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="1" column="0">
+                     <widget class="QCheckBox" name="FarmMaterial_异化尖刺骨片checkBox">
+                      <property name="text">
+                       <string>异化尖刺骨片</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="2" column="0">
+                     <widget class="QCheckBox" name="FarmMaterial_结霜毒砂晶checkBox">
+                      <property name="text">
+                       <string>结霜毒砂晶</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="3" column="0">
+                     <widget class="QCheckBox" name="FarmMaterial_衰变暮辉晶checkBox">
+                      <property name="text">
+                       <string>衰变暮辉晶</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="4" column="0">
+                     <widget class="QCheckBox" name="FarmMaterial_异化真红囊胞checkBox">
+                      <property name="text">
+                       <string>异化真红囊胞</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="5" column="0">
+                     <widget class="QCheckBox" name="FarmMaterial_沉雾泪晶checkBox">
+                      <property name="text">
+                       <string>沉雾泪晶</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="6" column="0">
+                     <widget class="QCheckBox" name="FarmMaterial_异化棘状角checkBox">
+                      <property name="text">
+                       <string>异化棘状角</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="7" column="0">
+                     <widget class="QCheckBox" name="FarmMaterial_异化暗凝胶checkBox">
+                      <property name="text">
+                       <string>异化暗凝胶</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="8" column="0">
+                     <widget class="QCheckBox" name="FarmMaterial_繁盛曲铜晶checkBox">
+                      <property name="text">
+                       <string>繁盛曲铜晶</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="9" column="0">
+                     <widget class="QCheckBox" name="FarmMaterial_异化拟怪腕足checkBox">
+                      <property name="text">
+                       <string>异化拟怪腕足</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="10" column="0">
+                     <widget class="QCheckBox" name="FarmMaterial_异化诡影鞘翅checkBox">
+                      <property name="text">
+                       <string>异化诡影鞘翅</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="11" column="0">
+                     <widget class="QCheckBox" name="FarmMaterial_燃念赤晶checkBox">
+                      <property name="text">
+                       <string>燃念赤晶</string>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
              </widget>
             </item>
            </layout>
@@ -445,10 +697,19 @@
          </item>
          <item>
           <widget class="QGroupBox" name="LogBox">
-           <property name="title">
-            <string/>
+           <property name="minimumSize">
+            <size>
+             <width>300</width>
+             <height>0</height>
+            </size>
            </property>
-           <layout class="QHBoxLayout" name="horizontalLayout_11">
+           <property name="title">
+            <string>运行状态</string>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_log" stretch="1,2">
+            <item>
+             <widget class="SnapshotLabel" name="SnapshotLabel"/>
+            </item>
             <item>
              <widget class="QTextBrowser" name="textBrowser"/>
             </item>
@@ -520,11 +781,6 @@
         </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tools">
-      <attribute name="title">
-       <string>工具</string>
-      </attribute>
-     </widget>
       <widget class="QWidget" name="settings">
        <property name="mouseTracking">
         <bool>false</bool>
@@ -558,6 +814,19 @@
               <string>检查更新</string>
              </property>
             </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_update">
+             <property name="orientation">
+              <enum>Qt::Orientation::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
            </item>
           </layout>
          </widget>
@@ -639,6 +908,19 @@
              <item>
               <widget class="QComboBox" name="AfterFinishCombo"/>
              </item>
+             <item>
+              <spacer name="horizontalSpacer_after_finish">
+               <property name="orientation">
+                <enum>Qt::Orientation::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
             </layout>
            </item>
           </layout>
@@ -650,6 +932,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>SnapshotLabel</class>
+   <extends>QLabel</extends>
+   <header>src.ui.snapshot</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

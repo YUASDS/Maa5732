@@ -8,17 +8,27 @@ from PySide6.QtWidgets import QApplication
 
 from src.ui.ui_controller import MyWidget
 from src.ui.theme import apply_theme
+from src.utils.console import attach_parent_console
+from src.utils.paths import BASE_DIR
 
 LOG_KEEP_DAYS = 7
+LOG_DIR = os.path.join(BASE_DIR, "logs")
+# 控制台日志级别,可用环境变量 MAA5732_LOG_LEVEL 调整(如 DEBUG)
+LOG_LEVEL = os.environ.get("MAA5732_LOG_LEVEL", "DEBUG").upper()
+LOG_FORMAT = (
+    "<green>{time:HH:mm:ss}</green> | <level>{level: <7}</level> | "
+    "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - "
+    "<level>{message}</level>"
+)
 
 
 def clean_old_logs(days=LOG_KEEP_DAYS):
     """清理logs目录中超过指定天数的日志文件"""
     cutoff = time.time() - days * 86400
-    if not os.path.exists("logs"):
+    if not os.path.isdir(LOG_DIR):
         return
-    for name in os.listdir("logs"):
-        path = os.path.join("logs", name)
+    for name in os.listdir(LOG_DIR):
+        path = os.path.join(LOG_DIR, name)
         try:
             if os.path.isfile(path) and os.path.getmtime(path) < cutoff:
                 os.remove(path)
@@ -34,12 +44,28 @@ def clean_update_dir():
             shutil.rmtree(update_dir, ignore_errors=True)
 
 
+def setup_logging() -> bool:
+    """配置日志: 控制台(可用时) + 文件双通道,返回控制台是否可用"""
+    console_ready = attach_parent_console()
+    # 去掉默认 stderr sink,避免重复输出或写入已失效的流
+    logger.remove()
+    if console_ready:
+        try:
+            colorize = bool(sys.stderr.isatty())
+        except Exception:
+            colorize = False
+        logger.add(sys.stderr, level=LOG_LEVEL, format=LOG_FORMAT, colorize=colorize)
+    logger.add(os.path.join(LOG_DIR, f"{now_time}.log"), level="DEBUG")
+    if console_ready:
+        logger.info(f"日志目录: {LOG_DIR} | 终端级别: {LOG_LEVEL}")
+    return console_ready
+
+
 now_time = datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S")
-if not os.path.exists("logs"):
-    os.makedirs("logs")
+os.makedirs(LOG_DIR, exist_ok=True)
 clean_old_logs()
 clean_update_dir()
-logger.add(f"logs/{now_time}.log")
+setup_logging()
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     apply_theme(app)

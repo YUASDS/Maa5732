@@ -1,5 +1,16 @@
 from PySide6.QtWidgets import QApplication
 
+from src.utils.paths import asset_path
+
+
+def _asset_url(*parts: str) -> str:
+    """Qt 样式表中的图片路径需要正斜杠及绝对路径"""
+    return asset_path(*parts).replace("\\", "/")
+
+
+_CHECK_ICON = _asset_url("ui", "check.png")
+_DOWN_ARROW_ICON = _asset_url("ui", "down-arrow.png")
+
 THEME = """
 QWidget {
     font-family: "Microsoft YaHei UI", "Microsoft YaHei", "Segoe UI", sans-serif;
@@ -64,6 +75,10 @@ QCheckBox::indicator:checked {
 QCheckBox::indicator:disabled {
     background-color: #262B38;
     border-color: #343B4D;
+}
+/* 材料选择是两列密排网格,中间栏较窄,收紧行距以免出现横向滚动条 */
+QWidget#FarmMaterial_ScrollContents QCheckBox {
+    spacing: 4px;
 }
 QPushButton {
     background-color: #262B38;
@@ -153,6 +168,13 @@ QTextBrowser {
     font-family: "Cascadia Mono", Consolas, "Microsoft YaHei UI", monospace;
     font-size: 12px;
 }
+QLabel#SnapshotLabel {
+    background-color: #0D0F15;
+    border: 1px solid #2A2F3D;
+    border-radius: 8px;
+    color: #5A6274;
+    font-size: 12px;
+}
 QScrollBar:vertical {
     background: transparent;
     width: 10px;
@@ -235,6 +257,11 @@ QPushButton#DismissButton {
 }
 QPushButton#DismissButton:hover { color: #E6E9F0; }
 """
+
+# 图片路径改为绝对路径,避免工作目录变化导致图标丢失
+THEME = THEME.replace("assets/ui/check.png", _CHECK_ICON).replace(
+    "assets/ui/down-arrow.png", _DOWN_ARROW_ICON
+)
 
 
 def apply_theme(app: QApplication):
