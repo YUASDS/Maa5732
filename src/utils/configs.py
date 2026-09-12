@@ -26,7 +26,8 @@ PIPELINE_ORDER = [
     ("7", "Bureau", "8"),
     ("8", "Friends", "9"),
     ("9", "Raid", "10"),
-    ("10", "Supervision", None),
+    ("10", "Supervision", "11"),
+    ("11", "FarmMaterial", None),
 ]
 
 # 界面默认设置: [各任务开关, 各任务详细设置]
@@ -41,6 +42,7 @@ DEFAULT_SETTINGS = [
         "Construction": True,
         "Bureau": True,
         "GetMail": True,
+        "FarmMaterial": False,
     },
     {
         "Purchase": {
@@ -64,6 +66,11 @@ DEFAULT_SETTINGS = [
             "ServerCheckcomboBox": "B服",
             "StartAPPcheckBox": True,
         },
+        "FarmMaterial": {
+            "SweepCountCombo": "3",
+            "ProgressModeCombo": "自动",
+            "ProgressCombo": "13",
+        },
     },
 ]
 
@@ -79,6 +86,9 @@ DEFAULT_CONFIG = {
     "dismissed_update": "",
     "adb_address": "",
     "activity_remaining": {"date": "", "items": []},
+    # 材料刷取: 主线进度缓存(探测失败时兜底) 与 当天未完成的材料
+    "main_progress": "",
+    "material_remaining": {"date": "", "items": []},
 }
 
 CONFIG_PATH = asset_path("config", "config.json")
@@ -140,6 +150,8 @@ class cfg:
     dismissed_update = config.get("dismissed_update", "")
     adb_address = config.get("adb_address", "")
     activity_remaining = config.get("activity_remaining", {"date": "", "items": []})
+    main_progress = config.get("main_progress", "")
+    material_remaining = config.get("material_remaining", {"date": "", "items": []})
     game_process = None
 
 
@@ -155,6 +167,8 @@ def save_confg():
         "dismissed_update": cfg.dismissed_update,
         "adb_address": cfg.adb_address,
         "activity_remaining": cfg.activity_remaining,
+        "main_progress": cfg.main_progress,
+        "material_remaining": cfg.material_remaining,
     }
     os.makedirs(os.path.dirname(CONFIG_PATH), exist_ok=True)
     with open(CONFIG_PATH, "w", encoding="utf-8") as f:
